@@ -1,0 +1,20 @@
+	#active_link{
+		color:blue;
+	}
+	.markers{
+		color:white;
+		text-decoration: none;
+	}
+	.markers:visited{
+		color:white;
+		text-decoration: none;
+	}
+	.markers:hover{
+		color:yellow;
+		text-decoration: none;
+	}
+	.image_containers{
+		width: 400px;
+		height: 300px;
+	}
+	
