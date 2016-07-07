@@ -43,6 +43,12 @@ function drawCircle(x,y){
 	}
 	d3.select("#big").remove();
 	display(cx,cy,"big",radius);
+	var l=xcon.length;
+	for(var i=0;i<l;i++){
+		if(getDistance(xcon[i],ycon[i],cx,cy)>radius){
+			drawCircle(xcon[i],ycon[i]);
+		}
+	}
 }
 
 function getDistance(x1,y1,x2,y2){
@@ -86,3 +92,12 @@ var radius=Math.max(getDistance(newx,newy,tx,ty),getDistance(newx,newy,fx,fy));
 return [newx,newy,radius];
 }
 
+function checkAll(){
+	var l=xcon.length;
+	for(var i=0;i<length;i++){
+		if(getDistance(xcon[i],ycon[i],cx,cy)>radius){
+			drawCircle(xcon[i],xcon[j]);
+		}
+	}
+	return true;
+}
