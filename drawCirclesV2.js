@@ -176,3 +176,66 @@ function checkExists(x,y){
   		}
   		return false;
 }
+
+//Function which updates the circle
+function update(x,y){
+	//remove the original circle
+	d3.select("#big").remove();
+  			if(xcon.length==1) 
+  			/*
+  			 * If no. of points in the current plane are 1 then 
+			* just return back A circle cannot be formed with one point
+			*/
+  				return;
+  			else if(xcon.length==2){
+  				/*
+  				 * If no. of points in the plane are two, just draw circle using the two points
+  				 */
+  				drawCircle(xcon[0],ycon[0]);
+  				
+  			}
+  			else{
+  				var coordinates=getFarthest(cx,cy);  				  						
+  				/*
+  				 * Find the farthest point from the center of previous circle
+  				 */
+		  			if(x==fx1&&y==fy1){
+		  				/*
+		  				 * If current removed point (x,y) is fixed point fx1,fy1
+		  				 * update the new fixed point of circle
+		  				 */
+						fx1=coordinates[0];
+						fy1=coordinates[1];			
+						/*
+						 * and get new center for this circle
+						 */
+						Center=getNewCenter(cx,cy,fx2,fy2,fx2,fy2,fx1,fy1);
+						
+		  			}
+		  			else if(x==fx2&&y==fy2){
+		  				/*
+		  				 * Else if the point removed is the fixed point fx2,fy2
+		  				 * update it with new farthest point of the circle
+		  				 */
+		  				fx2=coordinates[0];
+						fy2=coordinates[1];		
+						/*
+						 * Get new coordinates for the center and as well as the radius
+						 */
+						Center=getNewCenter(cx,cy,fx1,fy1,fx1,fy1,fx2,fy2);
+						
+		  			}
+		  			/*
+		  			 * cx contains the new center X coordinate
+		  			 * cy contains the new center Y Coordinate
+		  			 * radius contains the new radius of the circle
+		  			 */
+		  				cx=Center[0];
+						cy=Center[1];
+						radius=Center[2];	
+  			/*
+  			 * Display the newly formed circle
+  			 */
+  			display(cx,cy,"big",radius);
+  			}
+}

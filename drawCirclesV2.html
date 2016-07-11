@@ -30,33 +30,7 @@
   		var x=event.clientX;
   		var y=event.clientY;
   		if(checkExists(x,y)){
-  			d3.select("#big").remove();
-  			if(xcon.length==1)
-  				return;
-  			else if(xcon.length==2){
-  				drawCircle(xcon[0],ycon[0]);
-  				
-  			}
-  			else{
-  				var coordinates=getFarthest(cx,cy);  				  						
-		  			if(x==fx1&&y==fy1){
-						fx1=coordinates[0];
-						fy1=coordinates[1];			
-						Center=getNewCenter(cx,cy,fx2,fy2,fx2,fy2,fx1,fy1);
-						
-		  			}
-		  			else if(x==fx2&&y==fy2){
-		  				fx2=coordinates[0];
-						fy2=coordinates[1];		
-						Center=getNewCenter(cx,cy,fx1,fy1,fx1,fy1,fx2,fy2);
-						
-		  			}
-		  			cx=Center[0];
-						cy=Center[1];
-						radius=Center[2];	
-  			
-  			display(cx,cy,"big",radius);
-  			}
+  			update(x,y);
 			
   		}
   		else{
