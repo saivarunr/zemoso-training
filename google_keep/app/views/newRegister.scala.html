@@ -1,0 +1,119 @@
+@(Welcome:String)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame 
+       Remove this if you use the .htaccess -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=PT+Serif' rel='stylesheet' type='text/css'>
+  <title>@Welcome</title>
+  <meta name="description" content="">
+  <meta name="author" content="zemoso">
+
+  <meta name="viewport" content="width=device-width; initial-scale=1.0">
+
+  <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+
+<body>
+  <div style="left:0px;top:0px;width: 100%;height: auto;position: absolute">
+  	<div style="left:0px;top:0px;width: 100%;height:10%;position: fixed;background:#EDC82E;">
+  			<div style="left:0px;top:0px;left:0px;width: auto;position: absolute">
+  				<p style="font-family: Roboto;font-size: 30px;color:white;">New Users &#64; Zemoso</p>	
+  			</div>
+  			
+  	</div>
+  	<div style="left:0px;top:0px;width: 100%;height:90px;z-index:-1;position: absolute;background: #D2AE29"></div>
+  	<div style="left:0px;top:90px;width: 100%;height:auto">
+  		<div style="left:0px;width:100%;top:90px;position:absolute;height: 400px;" align="center">
+  			<div style="left:30%;width: 40%;top:40px;position: absolute;height: 300px;background: #F7F7F7" ng-app="formApp" ng-controller="formController">
+  				<form style="margin-top: 5%">
+  				<div class="row">
+  					<div class="col-lg-12">
+  						<div class="input-group" align="center">
+  							<input type="text" ng-model="username" required class="form-control" placeholder="Username" />
+  						</div>
+  					</div>
+  				</div>
+  				<br>
+  				<div class="row">
+  					<div class="col-lg-12">
+  						<div class="input-group" align="center">
+  							<input type="password" ng-model="password" required class="form-control"  placeholder="Password"/>
+  						</div>
+  					</div>
+  				</div>
+  				<br>
+  				<div class="row">
+  					<div class="col-lg-12">
+  						<div class="input-group" align="center">
+  							<input type="password" ng-model="confirmpassword" required class="form-control"  placeholder="Confirm Password"/>
+  						</div>
+  					</div>
+  				</div>
+  				<br>
+  				<div class="row">
+  					<div class="col-lg-12">
+  						<div class="input-group" align="center">
+  							<input type="text" ng-model="email" required class="form-control"  placeholder="Email"/>
+  						</div>
+  					</div>
+  				</div>
+  				<br>
+  				<div class="row">
+  					<div class="col-lg-12">
+  						<div class="input-group" align="center">
+  							<button class="btn" ng-click="caller()" style="background: #D6D6D6">Login</button>
+  						</div>
+  					</div>
+  				</div>
+  				
+  				
+  			</form>
+  			</div>
+  			<div style="left:30%;width: 40%;top:250px;position: absolute;" ng-app="divHiderApp"   ng-controller="divHiderController">
+  					 				
+  			</div>
+  		</div>
+  	</div>
+  </div>
+  <script>
+  	var formApp=angular.module("formApp",[]);
+  	formApp.controller("formController",function($scope,$http){
+  		$scope.caller=function(){
+  			if(typeof $scope.username!="undefined"&&typeof $scope.password!="undefined"&&typeof $scope.confirmpassword!="undefined" &&typeof $scope.email!="undefined" ){
+  				if($scope.password==$scope.confirmpassword){
+  		$http.post("addUser",
+  					{"username":$scope.username,"password":$scope.password,"email":$scope.email},
+  					{headers:{"Content-Type":"application/json"}})
+  					.success(function(data, status, headers, config){
+  						console.log("1"+data+" "+status);	
+  					})
+  				.error(function(data, status, headers, config){
+  					console.log("2"+data+" "+status);
+  				});
+  				}
+  			}
+  		}
+  	});
+  	var divHider=angular.module("divHiderApp",[]);
+  	divHider.controller("divHiderController",function($scope){});
+  	
+  </script>
+</body>
+</html>

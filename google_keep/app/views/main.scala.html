@@ -1,0 +1,194 @@
+@(Welcome:String,Token:String)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame 
+       Remove this if you use the .htaccess -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<!-- jQuery-->
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"
+			  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+			  crossorigin="anonymous"></script> 
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=PT+Serif' rel='stylesheet' type='text/css'>
+  <title>@Welcome</title>
+  <meta name="description" content="">
+  <meta name="author" content="zemoso">
+
+  <meta name="viewport" content="width=device-width; initial-scale=1.0">
+
+  <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+
+<body ng-app="user_main">
+  <div style="left:0px;top:0px;width: 100%;height: auto;position: absolute">
+  	<div style="z-index:100;left:0px;top:0px;width: 100%;height:10%;position: fixed;background:#EDC82E;">
+  			<div style="left:0px;top:0px;left:0px;width:auto;position: absolute">
+  				<p style="font-family: Roboto;font-size: 30px;color:white;">Notes &#64; Zemoso</p>	
+  			</div>
+  			
+  	</div>
+  	<div style="left:0px;top:0px;width: 100%;height:90px;position: absolute;background: #D2AE29"></div>
+  	<div style="left:0px;top:90px;width: 100%;height:auto;">
+  		<div style="left:20%;width:60%;top:95px;position:absolute;height:195px;background:#F5F5F5" align="center">
+  			<div class="input-group" style="top:80px;left:14%;width: 72%;position: absolute">
+				<input type="text" onclick="$('#formModal').modal('show');" class="form-control" placeholder="Add Notes" aria-describedby="basic-addon2">
+			</div>
+  		</div>
+  		
+  		<div style="left:10%;top:200px;width:80%;position: absolute;" ng-controller="postGetFunction">
+  			<div style="margin-top:10%;left:0%;width:auto;position: absolute">
+  				<div ng-repeat="c in contents" style="margin-top:2%;font-family: Roboto">
+	  				<div class="panel panel-default" ng-click="popUpDiv(c)">
+					  <div class="panel-heading">{{c.title}}</div>
+					  <div class="panel-body">
+					    {{c.content}}
+					  </div>
+					</div>
+  				</div>	
+  			</div>
+  			
+  			
+				<!--Generic modal for present elements-->
+				  <div class="modal fade" id="genericModal" tabindex="-1" role="dialog">
+				  <div class="modal-dialog">
+				    <div class="modal-content">
+				      <form action="#" method="#">
+					      <div class="modal-header">
+					        <input type="text" ng-model="generic_title" class="form-control" placeholder="Title"/>
+					      </div>
+					      <div class="modal-body">
+					  		<input type="text" ng-model="generic_content" class="form-control" placeholder="Take a note..."/>
+					      </div>
+					      
+					      <div class="modal-footer">
+					      	<span style="float: left;font-size: 30px">
+					 			<span class="glyphicon glyphicon-time" onclick="" aria-hidden="true"></span>
+					 			<span>&nbsp;</span>
+					 			<span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>     		
+					       	</span>
+					        
+					        <button type="button" ng-click="generic_click()" class="btn btn-primary">Done</button>
+					      </div>
+					      <div class="modal-footer" id="reminderFooter" style="display: none">
+					      	
+					      </div>
+				      </form>    
+				    </div><!-- /.modal-content -->
+				  </div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
+  			
+  			
+  			
+  		</div>
+  	</div>
+  </div>
+  
+  <!--Modal -->
+  <div class="modal fade" id="formModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="#" method="#" ng-controller="note_controller">
+	      <div class="modal-header">
+	        <input type="text" ng-model="note_title" class="form-control" placeholder="Title"/>
+	      </div>
+	      <div class="modal-body">
+	  		<input type="text" ng-model="note_content" class="form-control" placeholder="Take a note..."/>
+	      </div>
+	      
+	      <div class="modal-footer">
+	      	<span style="float: left;font-size: 30px">
+	 			<span class="glyphicon glyphicon-time" onclick="changeStateOfReminder();" aria-hidden="true"></span>
+	 			<span>&nbsp;</span>
+	 			<span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>     		
+	       	</span>
+	        
+	        <button type="button" ng-click="post_contents()" class="btn btn-primary">Done</button>
+	      </div>
+	      <div class="modal-footer" id="reminderFooter" style="display: none">
+	      	
+	      </div>
+	      
+
+      </form>    
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+</body>
+<script>
+	var token="@Token";
+	function changeStateOfReminder(){
+		if($("#reminderFooter").css("display")=="none"){
+			$("#reminderFooter").css("display","block");
+		}
+		else{
+			$("#reminderFooter").css("display","none");
+		}
+	}
+	var form_app=angular.module("user_main",[]);
+	form_app.controller("note_controller",function($scope,$http){
+		$scope.post_contents=function(){
+			if(typeof $scope.note_title!="undefined"|typeof $scope.note_content!="undefined"){
+				$http.post(
+					"@routes.HomeController.addPost",
+					{
+						"title":$scope.note_title,"content":$scope.note_content
+					},
+					{
+						headers:{
+								"Authorization":token,"Content-Type":"application/json"
+								}
+					}
+				).success(function(data, status, headers, config){
+  						console.log(status);	
+  					})
+  				.error(function(data, status, headers, config){
+  					console.log(status);
+  				});
+				
+			}
+		}
+	});
+	form_app.controller("postGetFunction",function($scope,$http){
+		$http.get(
+			"@routes.HomeController.getAllPosts",
+			{
+				headers:{
+					"Authorization":token,"Content-Type":"application/json"
+				}
+			}
+		).success(function(data,status,headers,config){
+			$scope.contents=data;
+		}).error(function(data,status,headers,config){
+			console.log(status);
+		});
+	$scope.popUpDiv=function(container){
+		$("#genericModal").modal('show');
+		$scope.generic_title=container['title'];
+		$scope.generic_content=container['content'];
+		//If current container is equal to previous container -> give perms to update!
+	}
+	}
+	
+	
+	);	
+	
+</script>
+</html>
