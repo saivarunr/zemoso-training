@@ -14,7 +14,8 @@ GET		/main						controllers.HomeController.main
 POST	/addPost					controllers.HomeController.addPost
 GET		/getAllPosts				controllers.HomeController.getAllPosts
 GET		/getPost					controllers.HomeController.getPost
-
+POST	/archivePostById			controllers.HomeController.archivePostById
+GET		/viewArchives				controllers.HomeController.viewArchives
 
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count

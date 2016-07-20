@@ -1,6 +1,11 @@
 @(Welcome:String,Token:String)
 <!DOCTYPE html>
 <html lang="en">
+<style>
+	.fa:hover{
+		cursor: pointer;
+	}
+</style>
 <head>
   <meta charset="utf-8">
 
@@ -9,21 +14,27 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <!-- jQuery-->
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"
-			  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
 			  crossorigin="anonymous"></script> 
 <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
-<!-- Optional theme -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
 
 
 <!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
   <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=PT+Serif' rel='stylesheet' type='text/css'>
+  <!-- Notify.js Files -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/styles/metro/notify-metro.min.css" type="text/css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/styles/metro/notify-metro.min.js"></script>
+
+<!-- Font awesome script -->
+<script src="https://use.fontawesome.com/025cac6ad7.js"></script>
+  
+  
   <title>@Welcome</title>
   <meta name="description" content="">
   <meta name="author" content="zemoso">
@@ -35,8 +46,8 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 
-<body ng-app="user_main">
-  <div style="left:0px;top:0px;width: 100%;height: auto;position: absolute">
+<body ng-app="user_main" style="background:#629EB3">
+  <div style="left:0px;top:0px;width: 100%;height: auto;position: absolute;" ng-controller="user_main_controller">
   	<div style="z-index:100;left:0px;top:0px;width: 100%;height:10%;position: fixed;background:#EDC82E;">
   			<div style="left:0px;top:0px;left:0px;width:auto;position: absolute">
   				<p style="font-family: Roboto;font-size: 30px;color:white;">Notes &#64; Zemoso</p>	
@@ -45,24 +56,26 @@
   	</div>
   	<div style="left:0px;top:0px;width: 100%;height:90px;position: absolute;background: #D2AE29"></div>
   	<div style="left:0px;top:90px;width: 100%;height:auto;">
-  		<div style="left:20%;width:60%;top:95px;position:absolute;height:195px;background:#F5F5F5" align="center">
-  			<div class="input-group" style="top:80px;left:14%;width: 72%;position: absolute">
+  		<div style="left:30%;width:40%;top:95px;position:absolute;height:60px;background:#FCFCFC" align="center">
+  			<div class="input-group" style="width:90%;top:10px;left:5%;position: absolute">
 				<input type="text" onclick="$('#formModal').modal('show');" class="form-control" placeholder="Add Notes" aria-describedby="basic-addon2">
 			</div>
   		</div>
   		
-  		<div style="left:10%;top:200px;width:80%;position: absolute;" ng-controller="postGetFunction">
-  			<div style="margin-top:10%;left:0%;width:auto;position: absolute">
-  				<div ng-repeat="c in contents" style="margin-top:2%;font-family: Roboto">
-	  				<div class="panel panel-default" ng-click="popUpDiv(c)">
-					  <div class="panel-heading">{{c.title}}</div>
-					  <div class="panel-body">
-					    {{c.content}}
-					  </div>
+  		<div style="left:20%;top:160px;width:60%;position: absolute;">
+  			<div class="row" style="margin-top:10%;left:0%;width:auto;position: absolute">
+  				<div class="col-xs-4 col-md-4" style="min-width: 200px" ng-repeat="c in contents" style="font-family: Roboto">
+	  				<div class="card card-block">
+	  					<div ng-click="popUpDiv(c)">
+	  						<h4 class="card-title">{{c.title.length>30? (c.title|limitTo:30):(c.title)}}</h4>
+					  		<p class="card-text">{{c.content.length>200? (c.content | limitTo:200):(c.content)}}</p>	
+	  					</div>
+					  <i ng-click='archiveThisPost(c.postId)' class="fa fa-archive" aria-hidden="true"></i>		
+					  <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
 					</div>
   				</div>	
   			</div>
-  			
+  		
   			
 				<!--Generic modal for present elements-->
 				  <div class="modal fade" id="genericModal" tabindex="-1" role="dialog">
@@ -73,14 +86,14 @@
 					        <input type="text" ng-model="generic_title" class="form-control" placeholder="Title"/>
 					      </div>
 					      <div class="modal-body">
-					  		<input type="text" ng-model="generic_content" class="form-control" placeholder="Take a note..."/>
+					  		<textarea ng-model="generic_content" class="form-control" placeholder="Take a note..."></textarea>
+					  		<span style="float:right" ng-bind="createdDate"></span>
 					      </div>
 					      
 					      <div class="modal-footer">
 					      	<span style="float: left;font-size: 30px">
-					 			<span class="glyphicon glyphicon-time" onclick="" aria-hidden="true"></span>
-					 			<span>&nbsp;</span>
-					 			<span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>     		
+					 			<i class="fa fa-archive" aria-hidden="true"></i>		
+					 			<i class="fa fa-calendar-plus-o" aria-hidden="true"></i>		
 					       	</span>
 					        
 					        <button type="button" ng-click="generic_click()" class="btn btn-primary">Done</button>
@@ -92,47 +105,58 @@
 				    </div><!-- /.modal-content -->
 				  </div><!-- /.modal-dialog -->
 				</div><!-- /.modal -->
+  				
+  				
+  				<!--Modal -->
+				  <div class="modal fade" id="formModal" tabindex="-1" role="dialog">
+				  <div class="modal-dialog">
+				    <div class="modal-content">
+				      <form action="#" method="#">
+					      <div class="modal-header">
+					        <input type="text" ng-model="note_title" class="form-control" placeholder="Title"/>
+					      </div>
+					      <div class="modal-body">
+					      	<textarea  ng-model="note_content" class="form-control" placeholder="Take a note..."></textarea>
+					  		
+					      </div>
+					      
+					      <div class="modal-footer">
+					      	<span style="float: left;font-size: 30px">
+					 			<i class="fa fa-archive" ng-click="post_contents(1)" aria-hidden="true"></i>		
+					 			<i class="fa fa-calendar-plus-o" aria-hidden="true"></i>     		
+					       </span>
+					        
+					        <button type="button" ng-click="post_contents(0)" class="btn btn-primary">Done</button>
+					      </div>
+					      <div class="modal-footer" id="reminderFooter" style="display: none">
+					      	
+					      </div>
+					      
+				
+				      </form>    
+				    </div><!-- /.modal-content -->
+				  </div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
   			
   			
-  			
+  		</div>
+  		<div id="leftMenu" style="left:0px;top:90px;width:18%;height:auto;position: absolute">
+  			<div style="margin-top:10%;left:0px;height:400px;background: #478DA6;max-width:40%">
+  				<a href="#viewArchives">View Archives</a>
+  			</div>
+  			<div ng-view>
+  				
+  			</div>
   		</div>
   	</div>
   </div>
   
-  <!--Modal -->
-  <div class="modal fade" id="formModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form action="#" method="#" ng-controller="note_controller">
-	      <div class="modal-header">
-	        <input type="text" ng-model="note_title" class="form-control" placeholder="Title"/>
-	      </div>
-	      <div class="modal-body">
-	  		<input type="text" ng-model="note_content" class="form-control" placeholder="Take a note..."/>
-	      </div>
-	      
-	      <div class="modal-footer">
-	      	<span style="float: left;font-size: 30px">
-	 			<span class="glyphicon glyphicon-time" onclick="changeStateOfReminder();" aria-hidden="true"></span>
-	 			<span>&nbsp;</span>
-	 			<span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>     		
-	       	</span>
-	        
-	        <button type="button" ng-click="post_contents()" class="btn btn-primary">Done</button>
-	      </div>
-	      <div class="modal-footer" id="reminderFooter" style="display: none">
-	      	
-	      </div>
-	      
-
-      </form>    
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+  
 
 
 </body>
 <script>
+	
 	var token="@Token";
 	function changeStateOfReminder(){
 		if($("#reminderFooter").css("display")=="none"){
@@ -143,13 +167,52 @@
 		}
 	}
 	var form_app=angular.module("user_main",[]);
-	form_app.controller("note_controller",function($scope,$http){
-		$scope.post_contents=function(){
-			if(typeof $scope.note_title!="undefined"|typeof $scope.note_content!="undefined"){
+	form_app.config(['$routeProvider',function($routeProvider){
+		$routeProvider.when("/viewArchives",{
+			templateUrl:"@routes.HomeController.viewArchives",
+			controller:"viewArchivesController"
+		}).otherwise({redirectTo:'/something'});
+	}]);
+	
+	
+	/*form_app.config(['$routeProvider',function($routeProvider){
+		$routeProvider.when("/viewArchives",{
+			templateUrl:"@routes.HomeController.viewArchives",
+			controller:'viewArchivesController'
+		}).otherwise({
+			redirectTo: '/viewArchives';
+		});
+	}]);*/
+	
+	form_app.controller("viewArchivesController",function($scope){
+		$scope.temp="single page app still in progress";
+	});
+	
+	form_app.controller("user_main_controller",function($scope,$http){
+		$scope.note_title="";
+		$scope.note_content="";
+		$scope.get_contents=function(){
+			
+			$http.get(
+				"@routes.HomeController.getAllPosts",
+				{
+					headers:{
+						"Authorization":token,"Content-Type":"application/json"
+					}
+				}
+			).success(function(data,status,headers,config){
+				$scope.contents=data;
+			}).error(function(data,status,headers,config){
+				console.log(status);
+			});	
+		};
+		$scope.get_contents();
+		$scope.post_contents=function(isArchive){
+			if($scope.note_title!=""|$scope.note_content!=""){
 				$http.post(
 					"@routes.HomeController.addPost",
 					{
-						"title":$scope.note_title,"content":$scope.note_content
+						"title":$scope.note_title,"content":$scope.note_content,"isArchive":isArchive
 					},
 					{
 						headers:{
@@ -157,38 +220,51 @@
 								}
 					}
 				).success(function(data, status, headers, config){
+						if(isArchive==1){
+							$.notify("Note archived","success");
+							$("#formModal").modal('hide');
+						}
   						console.log(status);	
+  						$scope.get_contents();
   					})
   				.error(function(data, status, headers, config){
-  					console.log(status);
+  					console.log(status+" "+data);
   				});
 				
+				$scope.note_title="";
+				$scope.note_content="";
+				 
 			}
+			
+		};
+		
+		
+		$scope.popUpDiv=function(container){
+			$("#genericModal").modal('show');
+			$scope.generic_title=container['title'];
+			$scope.generic_content=container['content'];
+			$scope.createdDate="Last edited at "+container['date'];
+			//If current container is equal to previous container -> give perms to update!
 		}
-	});
-	form_app.controller("postGetFunction",function($scope,$http){
-		$http.get(
-			"@routes.HomeController.getAllPosts",
+		
+		$scope.archiveThisPost=function(postId){
+			$http.post("@routes.HomeController.archivePostById",
+			{"postId":postId},
 			{
 				headers:{
-					"Authorization":token,"Content-Type":"application/json"
-				}
+							"Authorization":token,
+							"Content-Type":"application/json"
+						}
 			}
-		).success(function(data,status,headers,config){
-			$scope.contents=data;
-		}).error(function(data,status,headers,config){
-			console.log(status);
-		});
-	$scope.popUpDiv=function(container){
-		$("#genericModal").modal('show');
-		$scope.generic_title=container['title'];
-		$scope.generic_content=container['content'];
-		//If current container is equal to previous container -> give perms to update!
-	}
-	}
+			).success(function(data,status,headers,config){
+				$scope.get_contents();
+				$.notify("Note archived","info");
+			}).error(function(data,status,headers,config){
+				
+			});
+		}
+	});
 	
-	
-	);	
 	
 </script>
 </html>

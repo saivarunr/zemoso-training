@@ -16,11 +16,11 @@ create table app_users (
 create table posts (
   post_id                       integer auto_increment not null,
   app_users_username            varchar(255),
-  content                       varchar(255),
-  title                         varchar(255),
-  timestamp                     timestamp default current_timestamp,
+  content                       TEXT,
+  title                         TEXT,
+  timestamp                     timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   reminder                      varchar(255),
-  is_archive                    varchar(255),
+  is_archive                    int default 0,
   constraint pk_posts primary key (post_id)
 );
 

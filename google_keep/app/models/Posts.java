@@ -15,21 +15,21 @@ public class Posts extends Model{
 	@ManyToOne
 	private AppUsers appUsers;
 	
-	
+	@Column(columnDefinition="TEXT")
 	private String content;
 	
-	
+	@Column(columnDefinition="TEXT")
 	private String title;
 	
-	@Column(name="timestamp",columnDefinition="timestamp default current_timestamp")
+	@Column(name="timestamp",columnDefinition="timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private String date;
 	
 	private String reminder;
+	@Column(columnDefinition="int default 0")
+	private Integer isArchive; 
 	
-	private String isArchive; 
 	
-	
-	public Posts(AppUsers appUsers,String title,String content,String reminder,String isArchive) {
+	public Posts(AppUsers appUsers,String title,String content,String reminder,Integer isArchive) {
 		this.setAppUsers(appUsers);
 		this.setTitle(title);
 		this.setContent(content);
@@ -69,11 +69,11 @@ public class Posts extends Model{
 		this.reminder = reminder;
 	}
 
-	public String getIsArchive() {
+	public Integer getIsArchive() {
 		return isArchive;
 	}
 
-	public void setIsArchive(String isArchive) {
+	public void setIsArchive(Integer isArchive) {
 		this.isArchive = isArchive;
 	}
 

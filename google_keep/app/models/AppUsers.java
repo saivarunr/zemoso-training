@@ -34,10 +34,11 @@ public class AppUsers extends com.avaje.ebean.Model{
 	public AppUsers(String username){
 		this.username=username;
 	}
-	public AppUsers(String username,String password,String email){
+	public AppUsers(String username,String password,String email,String token){
 		this.email=email;
 		this.username=username;
 		this.password=password;
+		this.token=token;
 		
 	}
 	public String getPassword() {
