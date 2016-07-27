@@ -330,17 +330,15 @@ box-shadow: -2px 10px 18px 0px rgba(0,0,0,0.75);
 	 */
 	m_app.controller("homeController",function($scope,$http,servicesContainer,$interval){
 		//global reminder variable
-		var global_reminder="";
 		var global_reminder_update="";
 		/*
 		 * models from pop_up_modal
 		 */
-		$scope.am_pm="am";
-		$scope.user_date="";
-		$scope.hours="";
-		$scope.minutes="";
-		$scope.note_title="";
-		$scope.note_content="";
+		$scope.user_date_g="";
+		$scope.user_time_g=""
+		$scope.generic_title="";
+		$scope.generic_content="";
+		global_reminder_update="";
 		
 		/*
 		 * Setting anchor to active
@@ -407,12 +405,12 @@ box-shadow: -2px 10px 18px 0px rgba(0,0,0,0.75);
 		 * triggered by modal's submission
 		 * submits either archived or un-archived post depends which depends on isArchive flag
 		 */
-		$scope.post_contents=function(isArchive){
-			if($scope.note_title!=""|$scope.note_content!=""){
+		$scope.post_contents=function(isArchive,isReminderActive){
+			if($scope.generic_title!=""|$scope.generic_content!=""){
 				$http.post(
 					"@routes.HomeController.addPost",
 					{
-						"title":$scope.note_title,"content":$scope.note_content,"isArchive":isArchive,"reminder":global_reminder
+						"title":$scope.generic_title,"content":$scope.generic_content,"isArchive":isArchive,"reminder":global_reminder_update,"isReminderActive":isReminderActive
 					},
 					{
 						headers:{
@@ -430,17 +428,19 @@ box-shadow: -2px 10px 18px 0px rgba(0,0,0,0.75);
   				.error(function(data, status, headers, config){
   					console.log(status+" "+data);
   				});
-				$scope.user_date="";
-				$scope.hours="";
-				$scope.minutes="";
-				$scope.note_title="";
-				$scope.note_content="";
-				global_reminder="";
-				$("#formModal").modal('hide');
+				$scope.user_date_g="";
+				$scope.user_time_g=""
+				$scope.generic_title="";
+				$scope.generic_content="";
+				global_reminder_update="";
+				closeAllDivs();
 			}
 			
 		};
 		
+		/*
+		 * Triggered by ng-click on Save reminder button of pop_up_modal
+		 */
 		$scope.popUpDiv=function(container){
 			$("#genericModal").modal('show');
 			$scope.generic_title=container['title'];
@@ -455,9 +455,19 @@ box-shadow: -2px 10px 18px 0px rgba(0,0,0,0.75);
 			$scope.prev_container=container;
 			//If current container is equal to previous container -> give perms to update!
 		}
-		/*
-		 * Triggered by ng-click on Save reminder button of pop_up_modal
-		 */
+		
+		
+		$scope.popUpPost=function(){
+			$("#genericModal").modal('show');
+			$scope.generic_title="";
+			$scope.generic_content="";
+			$scope.createdDate="";
+			$scope.postId="";
+			global_reminder_update="";
+			$scope.user_date_g="";
+			$scope.user_time_g="";
+			$scope.prev_container="postId";
+		}
 		
 		
 		/*
@@ -494,58 +504,6 @@ box-shadow: -2px 10px 18px 0px rgba(0,0,0,0.75);
 			}
 		}
 		
-		/*
-		 * Save the reminder into a local model 
-		 * check if the date and time are valid, if yes 
-		 * proceed
-		 * else
-		 * throw errors
-		 */
-		$scope.save_reminder_local=function(){
-			
-			$("#datepick").css("border-color","#D6D6D6");
-			$(".user_am_pm").css("border-color","#D6D6D6");
-			
-			if($scope.user_date==""|$scope.hours==""|$scope.minutes==""){
-				$("#datepick").css("border-color","red");
-				$(".user_am_pm").css("border-color","red");
-				return;
-			}
-			else if($scope.hours<1|$scope.hours>12|$scope.minutes>59|$scope.minutes<0){
-				$(".user_am_pm").css("border-color","red");
-				return;
-			}			
-			
-			var t=$scope.user_date+" "+$scope.hours+":"+$scope.minutes+" "+$scope.am_pm;
-			var date=new Date();
-			var user_d=new Date(t);
-			
-		
-			/*
-			 * Date comparsion current date comparsion with reminder date
-			 * if only eligible take them else show error!
-			 */
-		
-			if(user_d.getTime()<date.getTime()){
-				if(user_d.getDate()<date.getDate()|user_d.getMonth()<date.getMonth()|user_d.getYear()<date.getYear()){
-					$("#datepick").css("border-color","red");
-					$.notify("Using a date that's gone long ago?","warn");
-					return;
-				}
-				else{
-					$(".user_am_pm").css("border-color","red");
-					$.notify("We will not be able to create a reminder for that time!","warn");
-					return;		
-				}
-			}
-			else{
-				$("#datepick").css("border-color","green");
-				$(".user_am_pm").css("border-color","green");
-				$.notify("Saving your reminder!","info");
-				global_reminder=user_d.getTime();
-				return;
-			}
-		}
 		
 		$scope.save_reminder_local_generic=function(){
 			var user_gen_date=new Date($scope.user_date_g+" "+$scope.user_time_g).getTime();
@@ -560,7 +518,17 @@ box-shadow: -2px 10px 18px 0px rgba(0,0,0,0.75);
 		}
 		
 		$scope.generic_click=function(prev_container){
-			if($scope.generic_title!=prev_container['title']|
+			if(prev_container=="postId"){
+				var title=$scope.generic_title;
+				var content=$scope.generic_content;
+				var reminder=global_reminder_update;
+				var isReminderActive=1;
+				if(global_reminder_update!="") 
+					isReminderActive=0;
+				$scope.post_contents(0,isReminderActive);
+			}
+			else{
+				if($scope.generic_title!=prev_container['title']|
 			$scope.generic_content!=prev_container['content']|
 			prev_container['reminder']!=global_reminder_update
 			){
@@ -598,6 +566,10 @@ box-shadow: -2px 10px 18px 0px rgba(0,0,0,0.75);
 				console.log(status);
 			});
 			}
+				
+				
+			}
+			
 			
 			
 		}
