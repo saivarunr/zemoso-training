@@ -68,7 +68,7 @@ box-shadow: -3px 4px 13px -7px rgba(0,0,0,0.75);
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 
-<body ng-app="user_main" style="background:#F2F2F2">
+<body ng-app="user_main" style="background:#F2F2F2" ng-controller="mainController">
   <div style="left:0px;top:0px;width: 100%;height: auto;position: absolute;">
   	<div style="z-index:100;left:0px;top:0px;width: 100%;height:10%;position: fixed;background:#EDC82E;">
   			<div style="left:0px;top:0px;left:0px;width:auto;position: absolute">
@@ -129,6 +129,11 @@ box-shadow: -3px 4px 13px -7px rgba(0,0,0,0.75);
 													 * get time when script started execution
 													 */
 	var timings=[];									
+	
+	/**
+	 * global reminder variable
+	 */
+	var global_reminder_update="";
 	
 	/**
 	 * Get reminders from server and then run compare function
@@ -265,86 +270,10 @@ box-shadow: -3px 4px 13px -7px rgba(0,0,0,0.75);
 	
 	});
 	
-	
-	
-	/**
-	 * Controller of archive page
+		/**
+	 * Common controller to both sub controllers
 	 */
-	m_app.controller("archiveController",function($scope,$http,servicesContainer){
-		
-		$("#home").removeClass("active");
-		$("#archive").addClass("active");
-		/**
-		 * get archived contents of a user with respect to his/her token
-		 */
-		$scope.get_contents=function(isArchive){
-			var input=servicesContainer.get_contents(isArchive);
-			input.success(function(data,status,headers,config){
-				/**
-				 * contents is a model in archive page
-				 * which contains particulars of user's post such as 
-				 * 1) id
-				 * 2) title of post
-				 * 3) content of the post
-				 * 4) date of last update
-				 * 5) reminder
-				 * 6) archive flag
-				 */
-				$scope.contents=data;
-				
-			}).error(function(data,status,headers,config){
-				console.log(status);
-			});
-			getReminders();
-		};
-		/**
-		 * implict call to get contents of user when the page is loaded
-		 * a flag of "1" is specified mentioning "fetch only archived data"
-		 */
-		$scope.get_contents(1);
-		
-		/**
-		 * un-archives a particular post, triggered by a post's un-archived button
-		 *
-		 */
-		$scope.archiveThisPost=function(postId,flag){
-			var input=servicesContainer.archiveThisPost(postId,flag);
-			input
-			.success(function(data,status,headers,config){
-				closeAllDivs();
-				//generate a noitification saying post is un-archived
-				$.notify("Note un-archived","info");
-				/**
-				 * get the new list of notes that are archived since 
-				 * the call itself un-archives a post with id postId
-				 */
-				$scope.get_contents(1);
-			})
-			.error(function(data,status,headers,config){
-				console.log(status);	
-			});
-		}
-	});
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/**
-	 * controller for home page
-	 */
-	m_app.controller("homeController",function($scope,$http,servicesContainer,$interval){
-		//global reminder variable
-		var global_reminder_update="";
+	m_app.controller("mainController",function($scope){
 		/**
 		 * models from pop_up_modal
 		 */
@@ -353,6 +282,34 @@ box-shadow: -3px 4px 13px -7px rgba(0,0,0,0.75);
 		$scope.generic_title="";
 		$scope.generic_content="";
 		global_reminder_update="";
+		/**
+		 * Triggered by ng-click on Save reminder button of pop_up_modal
+		 */
+		$scope.popUpDiv=function(container){
+				$("#genericModal").modal('show');
+				$scope.generic_title=container['title'];
+				$scope.generic_content=container['content'];
+				$scope.createdDate="Last edited at "+container['date'];
+				$scope.postId=container['postId'];
+				global_reminder_update=container['reminder'];
+				var user_date_c=Number.parseInt(container['reminder']);
+				var date=new Date(user_date_c);
+				$scope.user_date_g=(date.getMonth()+1)+"/"+(date.getDate())+"/"+(date.getYear()+1900);
+				$scope.user_time_g=(date.getHours()+":"+date.getMinutes());
+				$scope.prev_container=container;
+			//If current container is equal to previous container -> give perms to update!
+		}
+		
+	});
+	
+	
+	
+	/**
+	 * controller for home page
+	 */
+	m_app.controller("homeController",function($scope,$http,servicesContainer,$interval){
+		
+		
 		
 		/**
 		 * Setting anchor to active
@@ -466,23 +423,7 @@ box-shadow: -3px 4px 13px -7px rgba(0,0,0,0.75);
 		
 		
 		
-		/**
-		 * Triggered by ng-click on Save reminder button of pop_up_modal
-		 */
-		$scope.popUpDiv=function(container){
-			$("#genericModal").modal('show');
-			$scope.generic_title=container['title'];
-			$scope.generic_content=container['content'];
-			$scope.createdDate="Last edited at "+container['date'];
-			$scope.postId=container['postId'];
-			global_reminder_update=container['reminder'];
-			var user_date_c=Number.parseInt(container['reminder']);
-			var date=new Date(user_date_c);
-			$scope.user_date_g=(date.getMonth()+1)+"/"+(date.getDate())+"/"+(date.getYear()+1900);
-			$scope.user_time_g=(date.getHours()+":"+date.getMinutes());
-			$scope.prev_container=container;
-			//If current container is equal to previous container -> give perms to update!
-		}
+	
 		
 		
 		$scope.popUpPost=function(){
@@ -546,8 +487,6 @@ box-shadow: -3px 4px 13px -7px rgba(0,0,0,0.75);
 			}
 		}
 		
-		
-		
 		/***
 		 * Saves or updates a post depending up on the value of argument "prev_container"
 		 * prev_container->{"postId":"Post NEW Data"}
@@ -601,7 +540,175 @@ box-shadow: -3px 4px 13px -7px rgba(0,0,0,0.75);
 			
 			
 		}
+		
 	});
+	
+		
+	
+	
+	
+	
+	
+	/**
+	 * Controller of archive page
+	 */
+	m_app.controller("archiveController",function($scope,$http,servicesContainer){
+		$("#home").removeClass("active");
+		$("#archive").addClass("active");
+		/**
+		 * get archived contents of a user with respect to his/her token
+		 */
+		$scope.get_contents=function(isArchive){
+			var input=servicesContainer.get_contents(isArchive);
+			input.success(function(data,status,headers,config){
+				/**
+				 * contents is a model in archive page
+				 * which contains particulars of user's post such as 
+				 * 1) id
+				 * 2) title of post
+				 * 3) content of the post
+				 * 4) date of last update
+				 * 5) reminder
+				 * 6) archive flag
+				 */
+				$scope.contents=data;
+				
+			}).error(function(data,status,headers,config){
+				console.log(status);
+			});
+			getReminders();
+		};
+		/**
+		 * implict call to get contents of user when the page is loaded
+		 * a flag of "1" is specified mentioning "fetch only archived data"
+		 */
+		$scope.get_contents(1);
+		
+		/**
+		 * un-archives a particular post, triggered by a post's un-archived button
+		 *
+		 */
+		$scope.archiveThisPost=function(postId,flag){
+			var input=servicesContainer.archiveThisPost(postId,flag);
+			input
+			.success(function(data,status,headers,config){
+				closeAllDivs();
+				//generate a noitification saying post is un-archived
+				$.notify("Note un-archived","info");
+				/**
+				 * get the new list of notes that are archived since 
+				 * the call itself un-archives a post with id postId
+				 */
+				$scope.get_contents(1);
+			})
+			.error(function(data,status,headers,config){
+				console.log(status);	
+			});
+		}
+		/**
+		 * archives a particular post with flag 1
+		 */
+		$scope.archiveThisPost=function(postId,flag){
+			
+				var input=servicesContainer.archiveThisPost(postId,flag);
+				input
+				.success(function(data,status,headers,config){
+					closeAllDivs();
+					//generate a noitification saying post is archived
+					$.notify("Note un-archived","info");
+					/**
+					 * get the new list of notes that are un-archived since 
+					 * the call itself archives a post with id postId
+					 */
+					$scope.get_contents(1);
+				})
+				.error(function(data,status,headers,config){
+					console.log(status);	
+				});	
+		}
+		
+		$scope.save_reminder_local_generic=function(){
+			
+			var user_gen_date=new Date($scope.user_date_g+" "+$scope.user_time_g).getTime();
+			if(user_gen_date<=new Date().getTime()){
+				$.notify("Cannot save that reminder","warn");
+				return;
+			}
+			else{
+				global_reminder_update=user_gen_date;
+				$.notify("Reminder saved","info");
+			}
+		}
+		
+		$scope.generic_click=function(prev_container){
+			if($scope.generic_title!=prev_container['title']|
+			$scope.generic_content!=prev_container['content']|
+			prev_container['reminder']!=global_reminder_update
+			){
+					var isReminderActive=1;
+					if(prev_container['reminder']!=global_reminder_update&&!isNaN(global_reminder_update)&&global_reminder_update!="") 
+						isReminderActive=0;
+					$http.post("@routes.HomeController.updatePost",
+					{
+						"postId":prev_container['postId'],			
+						"title":$scope.generic_title,
+						"content":$scope.generic_content,
+						"reminder":global_reminder_update,
+						"isArchive":1,
+						"isReminderActive":isReminderActive
+					},
+					{
+						headers:{
+							"Authorization":token,
+							"Content-Type":"application/json"
+						},
+					}
+					).success(function(data,status,headers,config){
+					$scope.get_contents(1);
+					$.notify("Note updated","info");
+					closeAllDivs();
+				}).error(function(data,status,headers,config){
+					console.log(status);
+				});
+			}
+		}
+		/**
+		 * updateReminder ng-click on a particular post,
+		 * pops up a reminder and then updates the reminder if it's valid else nope!
+		 */
+		$scope.updateReminder=function(container){
+			var x=container['postId'];
+			var new_date=$("#rem_date_"+x).val();
+			var new_time=$("#rem_time_"+x).val();
+			var new_date_time=new Date(new_date+" "+new_time).getTime();
+			if(new_date_time<=new Date().getTime()){
+				$.notify("Oops, the time is gone, we cannot bring it back!","warn");
+				return;
+			}
+			else{
+				$http.post(
+				"@routes.HomeController.updateReminder",
+				{"postId":x,"reminder":new_date_time},
+				{
+					headers:{
+						"Authorization":token,
+						"Content-Type":"application/json"
+					}
+				}
+				).success(function(data,status,headers,config){
+					$scope.get_contents(1);
+					$.notify("Reminder updated","success");
+						
+			}).error(function(data,status,headers,config){
+				console.log(status);
+			});
+				
+			}
+		}
+		
+		
+	});
+	
 	
 	/**
 	 * save_reminder_local_generic
@@ -621,5 +728,20 @@ box-shadow: -3px 4px 13px -7px rgba(0,0,0,0.75);
 		$("#"+id).addClass("light-shadow");
 		
 	}
+	function reminderStateChanger(){
+		if($("#reminderFooter_1").css("display")=="none"){
+			$("#reminderFooter_1").css("display","block");
+		}
+		else{
+			$("#reminderFooter_1").css("display","none");
+		}
+	}
+	function popUpDate(id){
+		$('#'+id).datepicker({minDate:new Date()});$('#'+id).datepicker('show')
+	}
+	function popUpTime(id){
+		$("#"+id).timepicker();
+	}
+	
 </script>
 </html>

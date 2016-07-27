@@ -149,7 +149,7 @@ public class HomeController extends Controller {
 	    	String content=jsonNode.path("content").asText();
 	    	String reminder=jsonNode.path("reminder").asText();
 	    	Integer isArchive=jsonNode.path("isArchive").asInt();
-	    	Integer isReminderActive=0;
+	    	Integer isReminderActive=jsonNode.path("isReminderActive").asInt();
 	    	Posts posts=new Posts(appUsers, title, content, reminder,isArchive,isReminderActive);
 	    	Ebean.beginTransaction();
 	    	Ebean.save(posts);

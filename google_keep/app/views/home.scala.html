@@ -107,32 +107,13 @@ box-shadow: -69px 6px 66px -25px rgba(0,0,0,0.53);
 </div>
   		
 <script type="application/javascript">
-function timepickPopUp(){
-	$("#timepick").timepicker();	
-}
-
-
 $(function(){
 	$("#datepick").datepicker({
 		minDate:new Date()
 	});
 });	
-function reminderStateChanger(){
-	if($("#reminderFooter_1").css("display")=="none"){
-		$("#reminderFooter_1").css("display","block");
-	}
-	else{
-		$("#reminderFooter_1").css("display","none");
-	}
+function timepickPopUp(){
+	$("#timepick").timepicker();	
 }
-function changecolor(){
-	$("#datepick").css("border-color","#D6D6D6");
-$(".user_am_pm").css("border-color","#D6D6D6");
-}
-function popUpDate(id){
-	$('#'+id).datepicker({minDate:new Date()});$('#'+id).datepicker('show')
-}
-function popUpTime(id){
-	$("#"+id).timepicker();
-}
+
 </script>

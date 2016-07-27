@@ -8,8 +8,31 @@
 	  								
 	  					</div>
 						<div id="foot_of_card_{{c.postId}}">
-							  <i ng-click='archiveThisPost(c.postId,0)' class="fa fa-cloud-upload" aria-hidden="true"></i>		
-							  <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
+							<i ng-click="archiveThisPost(c.postId,0)" class="fa fa-cloud-upload" aria-hidden="true"></i>		
+							  <div class="btn-group">
+								  <i class="fa fa-calendar-plus-o dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true"></i>
+								  <div class="dropdown-menu" align="center">
+								  	<div class="row" style="width:80%;margin-left:10%">
+								  		<div class="col sm-6">
+								  			<label>Date</label>
+								  			<input type="text" id="rem_date_{{c.postId}}" onclick="popUpDate(this.id);" class="form-control rem_date"/>	
+								  		</div>
+								  	</div>
+								  	<div class="row" style="width:80%;margin-left:10%">
+								  		<div class="col sm-6">
+								  			<label>Time</label>
+								  			<input type="text" id="rem_time_{{c.postId}}" onclick="popUpTime(this.id);" class="form-control"/>	
+								  		</div>
+								  	</div>
+								    <div class="dropdown-divider"></div>
+								    	<div class="row" style="width:80%;margin-left:10%">
+									  		<div class="col sm-6">
+									  			<input class="btn btn-primary form-control" type="submit" ng-click="updateReminder(c)" value="Save"/>	
+									  		</div>
+									  	</div>
+								    	
+								  </div>
+							</div>
 						</div>
 						<div ng-if="c.reminder!==''">
 							<div class="reminder-div" style="border-top:solid 1px;font-size:10px">{{c.reminder | date:'medium'}}</div>
@@ -17,6 +40,7 @@
 					</div>
   				</div>	
   			</div>
+  			
   			<!--Generic modal for present elements-->
 				  <div class="modal fade" id="genericModal" tabindex="-1" role="dialog">
 				  <div class="modal-dialog">
@@ -32,17 +56,42 @@
 					      
 					      <div class="modal-footer">
 					      	<span style="float: left;font-size: 30px">
-					 			<i class="fa fa-cloud-download" aria-hidden="true"></i>		
-					 			<i class="fa fa-calendar-plus-o" aria-hidden="true"></i>		
+					 			<i class="fa fa-cloud-upload" ng-click="archiveThisPost(postId,0)" aria-hidden="true"></i>		
+					 			<i class="fa fa-calendar-plus-o" onclick="reminderStateChanger();" aria-hidden="true"></i>
 					       	</span>
 					        
-					        <button type="button" ng-click="generic_click()" class="btn btn-primary">Done</button>
+							<button type="button" ng-click="generic_click(prev_container)" class="btn btn-primary">Done</button>
 					      </div>
-					      <div class="modal-footer" id="reminderFooter" style="display: none">
-					      	
-					      </div>
+					      <div class="modal-footer" id="reminderFooter_1" style="display:none">
+							<div class="row">
+								<div class="col-sm-6">
+									<span style="float:left">Set a reminder</span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-6">
+									<input type="text" ng-model="user_date_g"  placeholder="Pick a date" id="datepick" value="" class="form-control"/>	
+								</div>
+							<div class="col-sm-6">
+								<input type="text" ng-model="user_time_g"  placeholder="Pick a date" onclick="timepickPopUp()" id="timepick" class="form-control"/>
+							</div>
+													
+							</div>
+							<br><button type="button" ng-click="save_reminder_local_generic()" class="btn btn-primary">Save reminder</button>
+							  </div>
 				      </form>    
 				    </div><!-- /.modal-content -->
 				  </div><!-- /.modal-dialog -->
 				</div><!-- /.modal -->
 </div>
+<script type="application/javascript">
+$(function(){
+	$("#datepick").datepicker({
+		minDate:new Date()
+	});
+});	
+function timepickPopUp(){
+	$("#timepick").timepicker();	
+}
+
+</script>
