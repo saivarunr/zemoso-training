@@ -1,0 +1,204 @@
+<style>
+	#modalPoper{
+		-webkit-box-shadow: -69px 6px 66px -25px rgba(0,0,0,0.53);
+-moz-box-shadow: -69px 6px 66px -25px rgba(0,0,0,0.53);
+box-shadow: -69px 6px 66px -25px rgba(0,0,0,0.53);
+	}
+</style>
+<div style="left:30%;width:40%;top:95px;position:absolute;height:60px;" align="center">
+  			<div class="input-group" id="modalPoper" style="width:90%;top:10px;left:5%;position: absolute">
+				<input type="text" onclick="pop_modal();" class="form-control" placeholder="Add Notes" aria-describedby="basic-addon2">
+			</div>
+  </div> 
+<div style="left:20%;top:160px;width:60%;position: absolute;">
+  			<div class="row" style="margin-top:10%;left:0%;width:auto;position: absolute">
+  				<div class="col-xs-4 col-md-4" style="min-width: 200px" ng-init="counter=0"ng-repeat="c in contents" style="font-family: Roboto">
+	  				<div class="card card-block">
+	  					<div ng-click="popUpDiv(c)">
+	  						<h4 class="card-title">{{c.title.length>30? (c.title|limitTo:30):(c.title)}}</h4>
+					  		<p class="card-text">{{c.content.length>200? (c.content | limitTo:200):(c.content)}}</p>	
+	  								
+	  					</div>
+					  <i ng-click="archiveThisPost(c.postId,1)" class="fa fa-cloud-download" aria-hidden="true"></i>		
+					  
+					  
+					  <!-- -->
+					  <div class="btn-group">
+						  <i class="fa fa-calendar-plus-o dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true"></i>
+						  <div class="dropdown-menu" align="center">
+						  	<div class="row" style="width:80%;margin-left:10%">
+						  		<div class="col sm-6">
+						  			<label>Date</label>
+						  			<input type="text" id="rem_date_{{c.postId}}" onclick="popUpDate(this.id);" class="form-control rem_date"/>	
+						  		</div>
+						  	</div>
+						  	<div class="row" style="width:80%;margin-left:10%">
+						  		<div class="col sm-6">
+						  			<label>Time</label>
+						  			<input type="text" id="rem_time_{{c.postId}}" onclick="popUpTime(this.id);" class="form-control"/>	
+						  		</div>
+						  	</div>
+						    <div class="dropdown-divider"></div>
+						    	<div class="row" style="width:80%;margin-left:10%">
+							  		<div class="col sm-6">
+							  			<input class="btn btn-primary form-control" type="submit" ng-click="updateReminder(c)" value="Save"/>	
+							  		</div>
+							  	</div>
+						    	
+						  </div>
+					</div>
+					  <!-- -->
+					  
+					  
+						<div ng-if="c.reminder!==''">
+							<div class="reminder-div" style="border-top:solid 1px black;font-size:10px">{{c.reminder | date:"medium"}}</div>
+							
+						</div>
+					</div>
+					
+  				</div>	
+  			</div>
+  		
+  			
+<!--Generic modal for present elements-->
+  <div class="modal fade" id="genericModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+
+<div class="modal-content">
+  <form action="#" method="#">
+  <div class="modal-header">
+<input type="text" ng-model="generic_title" class="form-control" placeholder="Title"/>
+  </div>
+  <div class="modal-body">
+<textarea ng-model="generic_content" rows="7" class="form-control" placeholder="Take a note..."></textarea>
+<span style="float:right" ng-bind="createdDate"></span>
+  </div>
+  
+  <div class="modal-footer">
+<span style="float: left;font-size: 30px">
+<i class="fa fa-cloud-download" ng-click="archiveThisPost(postId,1)" aria-hidden="true"></i>		
+<i class="fa fa-calendar-plus-o"  aria-hidden="true"></i>	
+</span>
+
+<button type="button" ng-click="generic_click(prev_container)" class="btn btn-primary">Done</button>
+  </div>
+  <div class="modal-footer" id="reminderFooter_1" style="display:">
+<div class="row">
+<div class="col-sm-6">
+<span style="float:left">Set a reminder</span>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-6">
+<input type="text" ng-model="user_date_g"  placeholder="Pick a date" id="datepick" value="" class="form-control"/>	
+</div>
+<div class="col-sm-6">
+<input type="text" ng-model="user_time_g"  placeholder="Pick a date" onclick="timepickPopUp()" id="timepick" class="form-control"/>
+</div>
+						
+</div>
+<br><button type="button" ng-click="save_reminder_local_generic()" class="btn btn-primary">Save reminder</button>
+  </div>
+  </form>    
+</div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+  				
+  		
+  		
+  				
+<!--Modal -->
+  <div class="modal fade" id="formModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+<div class="modal-content">
+  <form action="#" method="#">
+  <div class="modal-header">
+<input type="text" ng-model="note_title" class="form-control" placeholder="Title"/>
+  </div>
+  <div class="modal-body">
+<textarea  ng-model="note_content" rows="7" class="form-control" placeholder="Take a note..."></textarea>
+	
+  </div>
+  
+  <div class="modal-footer">
+<span style="float: left;font-size: 30px">
+<i class="fa fa-cloud-download" ng-click="post_contents(1)" aria-hidden="true"></i>		
+<i class="fa fa-calendar-plus-o"  onclick="reminderStateChanger();" aria-hidden="true"></i>     		
+   </span>
+
+<button type="button" ng-click="post_contents(0)" class="btn btn-primary">Done</button>
+  </div>
+  <div class="modal-footer" id="reminderFooter" style="display:">
+<div class="row">
+<div class="col-sm-6">
+<span style="float:left">Set a reminder</span>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-6">
+<input type="text" ng-model="user_date" onclick="popUpDate(this.id);" placeholder="Pick a date" onclick="timepickPopUp()" id="timepick_modal" class="form-control"/>	
+</div>
+<div class="col-sm-6">
+<div class="input-group">
+<input type="text" class="form-control user_am_pm" onfocus="changecolor()"  ng-model="hours" placeholder="HH"/>
+<span class="input-group-addon">:</span>
+<input type="text" class="form-control user_am_pm" onfocus="changecolor()" ng-model="minutes" placeholder="MM"/>
+  <span class="input-group-addon user_am_pm">
+<input type="radio" id="am"  ng-model="am_pm" value="am">AM
+  </span>
+  <span class="input-group-addon user_am_pm">
+<input type="radio" id="pm"  ng-model="am_pm" value="pm">PM
+  </span>
+</div>
+
+</div>
+	
+</div>
+<br><button type="button" ng-click="save_reminder_local()" class="btn btn-primary">Save reminder</button>
+
+					
+  		
+  </div>
+      
+
+  </form>    
+</div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+  			
+  			
+</div>
+  		
+<script type="application/javascript">
+function timepickPopUp(){
+	$("#timepick").timepicker();	
+}
+
+function pop_modal(){
+	$('#formModal').modal('show');
+	
+}
+$(function(){
+	$("#datepick").datepicker({
+		minDate:new Date()
+	});
+});	
+function reminderStateChanger(){
+	if($("#reminderFooter").css("display")=="none"){
+		$("#reminderFooter").css("display","block");
+	}
+	else{
+		$("#reminderFooter").css("display","none");
+	}
+}
+function changecolor(){
+	$("#datepick").css("border-color","#D6D6D6");
+$(".user_am_pm").css("border-color","#D6D6D6");
+}
+function popUpDate(id){
+	$('#'+id).datepicker({minDate:new Date()});$('#'+id).datepicker('show')
+}
+function popUpTime(id){
+	$("#"+id).timepicker();
+}
+</script>

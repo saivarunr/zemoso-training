@@ -4,7 +4,6 @@
 
 var xcon=[]; //X-Axis co-ordinate container
 var ycon=[]; //Y-axis co-ordinate container
-var index=0;	//index used for adding "ids" to points in the place
 var cx,cy,fx,fy,tx,ty; /*
                         * Center (cx,cy) 
                         * FarthestPoint for new point Farthest(fx,fy)
@@ -162,4 +161,18 @@ else{
 //Return maximum radius of target point and fixed point (the point which was farthest point on circle from target point)
 var radius=Math.max(getDistance(newx,newy,fx1,fy1),getDistance(newx,newy,fx2,fy2));
 return [newx,newy,radius];
+}
+
+function checkExists(x,y){
+	var l=xcon.length;
+	for(var i=0;i<l;i++){
+  			if(xcon[i]==x && ycon[i]==y){
+  				xcon.splice(i,1);
+  				ycon.splice(i,1);
+  				document.getElementById("i"+x+"-"+y).remove();
+  				return true;
+  				
+  			}
+  		}
+  		return false;
 }

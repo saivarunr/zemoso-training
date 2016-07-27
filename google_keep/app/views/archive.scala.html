@@ -1,0 +1,45 @@
+<div style="left:20%;top:60px;width:60%;position: absolute;">
+  			<div class="row" style="margin-top:10%;left:0%;width:auto;position: absolute">
+  				<div class="col-xs-4 col-md-4" style="min-width: 200px" ng-repeat="c in contents" style="font-family: Roboto">
+	  				<div class="card card-block">
+	  					<div ng-click="popUpDiv(c)">
+	  						<h4 class="card-title">{{c.title.length>30? (c.title|limitTo:30):(c.title)}}</h4>
+					  		<p class="card-text">{{c.content.length>200? (c.content | limitTo:200):(c.content)}}</p>	
+	  					</div>
+					  <i ng-click='archiveThisPost(c.postId,0)' class="fa fa-cloud-upload" aria-hidden="true"></i>		
+					  <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
+						<div ng-if="c.reminder!==''">
+							<div class="reminder-div" style="border-top:solid 1px;font-size:10px">{{c.reminder | date:'medium'}}</div>
+						</div>
+					</div>
+  				</div>	
+  			</div>
+  			<!--Generic modal for present elements-->
+				  <div class="modal fade" id="genericModal" tabindex="-1" role="dialog">
+				  <div class="modal-dialog">
+				    <div class="modal-content">
+				      <form action="#" method="#">
+					      <div class="modal-header">
+					        <input type="text" ng-model="generic_title" class="form-control" placeholder="Title"/>
+					      </div>
+					      <div class="modal-body">
+					  		<textarea ng-model="generic_content" class="form-control" placeholder="Take a note..."></textarea>
+					  		<span style="float:right" ng-bind="createdDate"></span>
+					      </div>
+					      
+					      <div class="modal-footer">
+					      	<span style="float: left;font-size: 30px">
+					 			<i class="fa fa-cloud-download" aria-hidden="true"></i>		
+					 			<i class="fa fa-calendar-plus-o" aria-hidden="true"></i>		
+					       	</span>
+					        
+					        <button type="button" ng-click="generic_click()" class="btn btn-primary">Done</button>
+					      </div>
+					      <div class="modal-footer" id="reminderFooter" style="display: none">
+					      	
+					      </div>
+				      </form>    
+				    </div><!-- /.modal-content -->
+				  </div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
+</div>

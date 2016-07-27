@@ -53,6 +53,10 @@ public class HomeController extends Controller {
         return ok(index.render());
     }
     public Result welcome(){
+    	response().setHeader("Cache-Control", "no-cache");
+    	response().setHeader("Cache-Control", "no-store");
+    	if(session("username")!=null)
+    		return redirect("main");
     	return ok(welcome.render("ZeMoSo Notes",""));
     }
     
@@ -112,9 +116,12 @@ public class HomeController extends Controller {
     }
     
     public  Result main(){
+    	response().setHeader("Cache-Control", "no-cache");
+    	response().setHeader("Cache-Control", "no-store");
     	if(session("username")==null)
-    		return redirect("login");
+    		return redirect("welcome");
     	AppUsers user=Ebean.find(AppUsers.class).where().eq("username", session("username")).findUnique();
+    	
     	return ok(main.render(session("username"),user.getToken()));
     }
     
@@ -140,9 +147,10 @@ public class HomeController extends Controller {
     		JsonNode jsonNode=request().body().asJson();
 	    	String title=jsonNode.path("title").asText();
 	    	String content=jsonNode.path("content").asText();
-	    	String reminder="";
+	    	String reminder=jsonNode.path("reminder").asText();
 	    	Integer isArchive=jsonNode.path("isArchive").asInt();
-	    	Posts posts=new Posts(appUsers, title, content, reminder,isArchive);
+	    	Integer isReminderActive=0;
+	    	Posts posts=new Posts(appUsers, title, content, reminder,isArchive,isReminderActive);
 	    	Ebean.beginTransaction();
 	    	Ebean.save(posts);
 	    	Ebean.commitTransaction();
@@ -155,17 +163,40 @@ public class HomeController extends Controller {
     }
     public Result getAllPosts(){
     	String token=request().getHeader("Authorization");
+    	int isArchive=Integer.parseInt(request().getQueryString("isArchive"));
     	AppUsers appUsers=Ebean.find(AppUsers.class).where().eq("token", token).findUnique();
     	if(appUsers==null)
     		return badRequest("");
     	try{
-    		List<Posts> list=Ebean.find(Posts.class).where().eq("appUsers", appUsers).eq("isArchive",0).orderBy("postId desc").findList();
+    		List<Posts> list=Ebean.find(Posts.class).where().eq("appUsers", appUsers).eq("isArchive",isArchive).orderBy("postId desc").findList();
     		return ok(Json.toJson(list));
     	}
     	catch(Exception e){
     		return internalServerError("");
     	}
     	
+    }
+    public Result getReminders(){
+    	String token=request().getHeader("Authorization");
+    	
+    	AppUsers appUsers=Ebean.find(AppUsers.class).where().eq("token", token).findUnique();
+    	if(appUsers==null)
+    		return badRequest("");
+    	try{
+    		List<Posts> list=Ebean.find(Posts.class)
+    				.where()
+    					.conjunction()
+	    					.eq("appUsers", appUsers)
+	    					.eq("isReminderActive", 0)
+	    					.ne("reminder","")
+	    				.endJunction()
+    					.orderBy("postId desc")
+    					.findList();
+    		return ok(Json.toJson(list));
+    	}
+    	catch(Exception e){
+    		return internalServerError("");
+    	}
     }
     public Result getPost(){
     	String token=request().getHeader("Authorization");
@@ -186,6 +217,7 @@ public class HomeController extends Controller {
     	String token=request().getHeader("Authorization");
     	JsonNode jsonNode=request().body().asJson();
     	String postId=jsonNode.path("postId").asText();
+    	int flag=jsonNode.path("flag").asInt();
     	try{
     		
 	    	Posts posts=Ebean.find(Posts.class)
@@ -196,7 +228,7 @@ public class HomeController extends Controller {
 	    			.endJunction()
 	    			.findUnique();
 	    	Ebean.beginTransaction();
-	    		posts.setIsArchive(1);
+	    		posts.setIsArchive(flag);
 	    		Ebean.update(posts);
 	    	Ebean.commitTransaction();
 	    	return ok();
@@ -206,7 +238,105 @@ public class HomeController extends Controller {
     	}
     	return badRequest();
     }
-    public Result viewArchives(){
-    	return ok(index.render(	));
+    public Result homePage(){
+    	return ok(home.render());
+    }
+    public Result archivePage(){
+    	return ok(archive.render());
+    }
+    
+    public Result setReminder(){
+    	String postId=request().getQueryString("postId");
+    	String token=request().getHeader("Authorization");
+    	try{
+    		
+	    	Posts posts=Ebean.find(Posts.class)
+	    			.where()
+	    			.conjunction()
+		    			.eq("appUsers", Ebean.find(AppUsers.class).where().eq("token", token).findUnique())
+		    			.eq("postId", postId)
+	    			.endJunction()
+	    			.findUnique();
+	    	Ebean.beginTransaction();
+	    		posts.setIsReminderActive(1);
+	    		Ebean.update(posts);
+	    	Ebean.commitTransaction();
+	    	return ok("1");
+    	}
+    	catch(Exception e){
+    		Ebean.rollbackTransaction();
+    		
+    	}
+    	return badRequest();
+    }
+    public Result updateReminder(){
+    	String token=request().getHeader("Authorization");
+    	JsonNode jsonNode=request().body().asJson();
+    	String postId=jsonNode.path("postId").asText();
+    	String reminder=jsonNode.path("reminder").asText();
+		try{
+    		Posts posts=Ebean.find(Posts.class)
+	    			.where()
+	    			.conjunction()
+		    			.eq("appUsers", Ebean.find(AppUsers.class).where().eq("token", token).findUnique())
+		    			.eq("postId", postId)
+	    			.endJunction()
+	    			.findUnique();
+    		
+	    	Ebean.beginTransaction();
+	    		posts.setIsReminderActive(0);
+	    		posts.setReminder(reminder);
+	    		Ebean.update(posts);
+	    	Ebean.commitTransaction();
+	    	
+	    	return ok("1");
+    	}
+    	catch(Exception e){
+    		Ebean.rollbackTransaction();
+    		
+    	}
+    	return badRequest();
+    }
+    public Result updatePost(){
+    	String token=request().getHeader("Authorization");
+    	AppUsers appUsers=Ebean.find(AppUsers.class).where().eq("token", token).findUnique();
+    	if(appUsers==null)
+    		return badRequest("");
+    	try{
+    		
+    		JsonNode jsonNode=request().body().asJson();
+    		String postId=jsonNode.path("postId").asText();
+	    	String title=jsonNode.path("title").asText();
+	    	String content=jsonNode.path("content").asText();
+	    	String reminder=jsonNode.path("reminder").asText();
+	    	Integer isArchive=jsonNode.path("isArchive").asInt();
+	    	Integer isReminderActive=jsonNode.path("isReminderActive").asInt();
+	    	Posts posts=Ebean.find(Posts.class).where()
+	    		.conjunction()
+	    			.eq("postId", postId)
+	    			.eq("appUsers", Ebean.find(AppUsers.class).where().eq("token", token).findUnique())
+	    		.endJunction()
+	    	.findUnique();
+	    	
+	    		posts.setTitle(title);
+	    		posts.setContent(content);
+	    		posts.setIsArchive(isArchive);
+	    		posts.setReminder(reminder);
+	    		posts.setIsReminderActive(isReminderActive);
+	    	Ebean.save(posts);
+	    	
+	    	return ok("");
+    	}
+    	catch(Exception e){
+    		Ebean.rollbackTransaction();
+    		return internalServerError(e.toString());
+    	}
+    }
+    
+    public Result logout(){
+    	if(session("username")!=null){
+    		session().clear();
+    	}
+    	return redirect("welcome");
     }
 }

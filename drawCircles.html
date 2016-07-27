@@ -29,13 +29,47 @@
   	function createCircles(event){
   		var x=event.clientX;
   		var y=event.clientY;
+  		if(checkExists(x,y)){
+  			d3.select("#big").remove();
+  			if(xcon.length==1)
+  				return;
+  			else if(xcon.length==2){
+  				drawCircle(xcon[0],ycon[0]);
+  				
+  			}
+  			else{
+  				var coordinates=getFarthest(cx,cy);  				  						
+  			if(x==fx1&&y==fy1){
+				fx1=coordinates[0];
+				fy1=coordinates[1];			
+				Center=getNewCenter(cx,cy,fx2,fy2,fx2,fy2,fx1,fy1);
+				cx=Center[0];
+				cy=Center[1];
+				radius=Center[2];	
+  			}
+  			else if(x==fx2&&y==fy2){
+  				fx2=coordinates[0];
+				fy2=coordinates[1];		
+				Center=getNewCenter(cx,cy,fx1,fy1,fx1,fy1,fx2,fy2);
+				cx=Center[0];
+				cy=Center[1];
+				radius=Center[2];
+  			}
+  			
+  			display(cx,cy,"big",radius);
+  			}
+			
+  		}
+  		else{
   		xcon.push(x);
   		ycon.push(y);
-  		display(x,y,index,"2");
-  		index+=1;
-  		l=xcon.length;
-  		drawCircle(x,y);
-  		if(l>1) //New function(s) added to minimize the size of the circle
+  		display(x,y,"i"+x+"-"+y,"2");
+  		
+  		drawCircle(x,y);	
+  		}
+  			
+  		
+  		if(xcon.length>1) //New function(s) added to minimize the size of the circle
   			minimize();
   	}
   </script>

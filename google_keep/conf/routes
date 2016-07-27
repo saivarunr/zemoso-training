@@ -12,10 +12,22 @@ GET 	/trial						controllers.HomeController.trial
 POST 	/jwt						controllers.HomeController.jwt
 GET		/main						controllers.HomeController.main
 POST	/addPost					controllers.HomeController.addPost
+
 GET		/getAllPosts				controllers.HomeController.getAllPosts
+
+
 GET		/getPost					controllers.HomeController.getPost
 POST	/archivePostById			controllers.HomeController.archivePostById
-GET		/viewArchives				controllers.HomeController.viewArchives
+
+GET		/home						controllers.HomeController.homePage
+GET		/archive					controllers.HomeController.archivePage
+GET		/getReminders				controllers.HomeController.getReminders
+GET		/setReminder				controllers.HomeController.setReminder
+POST	/updateReminder				controllers.HomeController.updateReminder
+POST	/updatePost					controllers.HomeController.updatePost
+GET		/logout						controllers.HomeController.logout
+	
+
 
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count

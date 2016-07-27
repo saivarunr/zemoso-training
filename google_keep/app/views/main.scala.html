@@ -5,6 +5,12 @@
 	.fa:hover{
 		cursor: pointer;
 	}
+	.card,.card-block{
+		-webkit-box-shadow: -2px 10px 18px 0px rgba(0,0,0,0.75);
+-moz-box-shadow: -2px 10px 18px 0px rgba(0,0,0,0.75);
+box-shadow: -2px 10px 18px 0px rgba(0,0,0,0.75);
+	}
+
 </style>
 <head>
   <meta charset="utf-8">
@@ -13,28 +19,39 @@
        Remove this if you use the .htaccess -->
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <!-- jQuery-->
-<script src="https://code.jquery.com/jquery-2.2.4.min.js"
-integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
-			  crossorigin="anonymous"></script> 
+<script src="assets/internals/jQuery.js"></script> 
+<link rel="stylesheet" href="assets/internals/jquery-ui.css">			
+<script src="assets/internals/jquery-ui.js"></script>  
+			  
+			  
+			  
 <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+<link rel="stylesheet" href="assets/internals/bootstrap4.min.css" >
 
 
 <!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-  <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-  <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
-  <link href='https://fonts.googleapis.com/css?family=PT+Serif' rel='stylesheet' type='text/css'>
+<script src="assets/internals/bootstrap4.min.js"></script>
+
+  <link href='assets/internals/roboto.css' rel='stylesheet' type='text/css'>
+  <link href='assets/internals/Montserrat.css' rel='stylesheet' type='text/css'>
+  <link href='assets/internals/PT Serif.css' rel='stylesheet' type='text/css'>
+  
   <!-- Notify.js Files -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/styles/metro/notify-metro.min.css" type="text/css"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/styles/metro/notify-metro.min.js"></script>
+  <script src="assets/internals/notify.min.js"></script>
+  <link rel="stylesheet" href="assets/internals/notify-metro.min.css" type="text/css"/>
+  <script src="assets/internals/notify-metro.min.js"></script>
+
+<!-- Angular JS&routes -->
+<script src="assets/internals/angular.min.js"></script>
+<script type="text/javascript" src="assets/internals/angular-route.min.js"></script>
 
 <!-- Font awesome script -->
-<script src="https://use.fontawesome.com/025cac6ad7.js"></script>
-  
-  
+<script src="assets/internals/font-awesome-025cac6ad7.js"></script>
+
+<!-- time picker -->
+<script src="assets/timepicker/js/bootstrap-timepicker.js"></script>
+<link rel="stylesheet/less" href="assets/timepicker/css/timepicker.less"/>
+
   <title>@Welcome</title>
   <meta name="description" content="">
   <meta name="author" content="zemoso">
@@ -46,173 +63,356 @@ integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 
-<body ng-app="user_main" style="background:#629EB3">
-  <div style="left:0px;top:0px;width: 100%;height: auto;position: absolute;" ng-controller="user_main_controller">
+<body ng-app="user_main" style="background:#F2F2F2">
+  <div style="left:0px;top:0px;width: 100%;height: auto;position: absolute;">
   	<div style="z-index:100;left:0px;top:0px;width: 100%;height:10%;position: fixed;background:#EDC82E;">
   			<div style="left:0px;top:0px;left:0px;width:auto;position: absolute">
   				<p style="font-family: Roboto;font-size: 30px;color:white;">Notes &#64; Zemoso</p>	
+  			</div>
+  			<div>
+  				<span style="float:right;right:10px;top:10px;position:absolute">
+  				<a href="logout">Logout</a>
+				</span>
   			</div>
   			
   	</div>
   	<div style="left:0px;top:0px;width: 100%;height:90px;position: absolute;background: #D2AE29"></div>
   	<div style="left:0px;top:90px;width: 100%;height:auto;">
-  		<div style="left:30%;width:40%;top:95px;position:absolute;height:60px;background:#FCFCFC" align="center">
-  			<div class="input-group" style="width:90%;top:10px;left:5%;position: absolute">
-				<input type="text" onclick="$('#formModal').modal('show');" class="form-control" placeholder="Add Notes" aria-describedby="basic-addon2">
-			</div>
-  		</div>
-  		
-  		<div style="left:20%;top:160px;width:60%;position: absolute;">
-  			<div class="row" style="margin-top:10%;left:0%;width:auto;position: absolute">
-  				<div class="col-xs-4 col-md-4" style="min-width: 200px" ng-repeat="c in contents" style="font-family: Roboto">
-	  				<div class="card card-block">
-	  					<div ng-click="popUpDiv(c)">
-	  						<h4 class="card-title">{{c.title.length>30? (c.title|limitTo:30):(c.title)}}</h4>
-					  		<p class="card-text">{{c.content.length>200? (c.content | limitTo:200):(c.content)}}</p>	
-	  					</div>
-					  <i ng-click='archiveThisPost(c.postId)' class="fa fa-archive" aria-hidden="true"></i>		
-					  <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
-					</div>
-  				</div>	
-  			</div>
-  		
-  			
-				<!--Generic modal for present elements-->
-				  <div class="modal fade" id="genericModal" tabindex="-1" role="dialog">
-				  <div class="modal-dialog">
-				    <div class="modal-content">
-				      <form action="#" method="#">
-					      <div class="modal-header">
-					        <input type="text" ng-model="generic_title" class="form-control" placeholder="Title"/>
-					      </div>
-					      <div class="modal-body">
-					  		<textarea ng-model="generic_content" class="form-control" placeholder="Take a note..."></textarea>
-					  		<span style="float:right" ng-bind="createdDate"></span>
-					      </div>
-					      
-					      <div class="modal-footer">
-					      	<span style="float: left;font-size: 30px">
-					 			<i class="fa fa-archive" aria-hidden="true"></i>		
-					 			<i class="fa fa-calendar-plus-o" aria-hidden="true"></i>		
-					       	</span>
-					        
-					        <button type="button" ng-click="generic_click()" class="btn btn-primary">Done</button>
-					      </div>
-					      <div class="modal-footer" id="reminderFooter" style="display: none">
-					      	
-					      </div>
-				      </form>    
-				    </div><!-- /.modal-content -->
-				  </div><!-- /.modal-dialog -->
-				</div><!-- /.modal -->
-  				
-  				
-  				<!--Modal -->
-				  <div class="modal fade" id="formModal" tabindex="-1" role="dialog">
-				  <div class="modal-dialog">
-				    <div class="modal-content">
-				      <form action="#" method="#">
-					      <div class="modal-header">
-					        <input type="text" ng-model="note_title" class="form-control" placeholder="Title"/>
-					      </div>
-					      <div class="modal-body">
-					      	<textarea  ng-model="note_content" class="form-control" placeholder="Take a note..."></textarea>
-					  		
-					      </div>
-					      
-					      <div class="modal-footer">
-					      	<span style="float: left;font-size: 30px">
-					 			<i class="fa fa-archive" ng-click="post_contents(1)" aria-hidden="true"></i>		
-					 			<i class="fa fa-calendar-plus-o" aria-hidden="true"></i>     		
-					       </span>
-					        
-					        <button type="button" ng-click="post_contents(0)" class="btn btn-primary">Done</button>
-					      </div>
-					      <div class="modal-footer" id="reminderFooter" style="display: none">
-					      	
-					      </div>
-					      
-				
-				      </form>    
-				    </div><!-- /.modal-content -->
-				  </div><!-- /.modal-dialog -->
-				</div><!-- /.modal -->
-  			
+  		<div ng-view>
   			
   		</div>
-  		<div id="leftMenu" style="left:0px;top:90px;width:18%;height:auto;position: absolute">
-  			<div style="margin-top:10%;left:0px;height:400px;background: #478DA6;max-width:40%">
-  				<a href="#viewArchives">View Archives</a>
+  		
+  		
+  		  <div id="leftMenu" class="well" style="left:0px;top:90px;width:18%;height:auto;position: fixed">
+  			<div style="margin-top:10%;left:0px;height:400px;">
+  				<ul class="nav nav-pills nav-stacked">
+				  <li class="nav-item">
+				    <a class="nav-link" id="home"  href="#home">Home</a>
+				  </li>
+				  <li class="nav-item">
+				    <a class="nav-link" id="archive" href="#archive">Archives</a>
+				  </li>
+				</ul>
   			</div>
-  			<div ng-view>
-  				
-  			</div>
+  			
   		</div>
   	</div>
   </div>
   
-  
+  <!-- reminder updater dialog box -->
+<div id="dialog" title="Basic dialog">
+  <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+</div>
 
 
 </body>
 <script>
-	
+	/*
+	 * User access token generated by server and posted 
+	 * on to client, used to get and post data of THE USER
+	 */
 	var token="@Token";
-	function changeStateOfReminder(){
-		if($("#reminderFooter").css("display")=="none"){
-			$("#reminderFooter").css("display","block");
-		}
-		else{
-			$("#reminderFooter").css("display","none");
+	var inter=setInterval(compare,1000);//interval variable
+	inter;
+	var script_start_time=new Date().getTime();
+	var timings=[];
+	
+	/*
+	 * Get reminders from server and then run compare function
+	 */
+	function getReminders(){
+		$.ajax({
+			url:"/getReminders",
+			type:"GET",
+			headers:{
+				"Authorization":token,
+				"Content-Type":"application/json"
+			},
+			success:function(data){
+				timings=data;
+			}
+		});	
+	}
+	
+	/*
+	 * update reminder trigger activity in database
+	 */
+	function updateThisReminder(timings){
+		$.ajax({
+			url:"/setReminder?postId="+timings['postId'],
+			type:"GET",
+			headers:{
+				"Authorization":token,
+				"Content-Type":"application/json"
+			},
+			dataType:'json',
+			success:function(data){
+				var x_1=Number.parseInt(timings['reminder']);
+				var user_date=new Date(x_1);
+				var print_out="Reminder: "+((user_date.getMonth()+1)+"/"+user_date.getDate()+"/"+(1900+user_date.getYear()))+" \n"+timings['title'];
+				getReminders();
+				if(timings['isArchive']==1){
+					window.location.href="main#/archive"
+				}
+				else{
+					window.location.href="main#/home"
+				}
+				alert(print_out);
+			}
+		});	
+	}
+	
+	/*
+	 * Compare function is used to compare present timestamp to 
+	 * the reminder's date and time if times match trigger the event of alert
+	 */
+	function compare(){
+		var current_time=(new Date().getTime());
+		var len=timings.length;
+		for(var i=0;i<len;i++){
+			var x_1=Number.parseInt(timings[i]['reminder']);
+			if(x_1>script_start_time&&x_1<=current_time){
+				var title=timings[i]['title'];
+				var user_date=new Date(x_1);
+				updateThisReminder(timings[i]);
+			}
 		}
 	}
-	var form_app=angular.module("user_main",[]);
-	form_app.config(['$routeProvider',function($routeProvider){
-		$routeProvider.when("/viewArchives",{
-			templateUrl:"@routes.HomeController.viewArchives",
-			controller:"viewArchivesController"
-		}).otherwise({redirectTo:'/something'});
-	}]);
 	
 	
-	/*form_app.config(['$routeProvider',function($routeProvider){
-		$routeProvider.when("/viewArchives",{
-			templateUrl:"@routes.HomeController.viewArchives",
-			controller:'viewArchivesController'
-		}).otherwise({
-			redirectTo: '/viewArchives';
-		});
-	}]);*/
 	
-	form_app.controller("viewArchivesController",function($scope){
-		$scope.temp="single page app still in progress";
+	/*
+	 * I was just funny here!
+	 * Color changer for reminder, red if time passed out
+	 * else green
+	 */
+	function colorSetter(){
+		var div_array=$(".reminder-div");
+		var l=div_array.length;
+		var new_date=new Date().getTime();
+		for(var i=0;i<l;i++){
+			if(new Date(div_array[i].innerHTML)<=new_date){
+				div_array[i].style.color="red";
+			}else{
+				div_array[i].style.color="green";
+			}
+		}
+	}
+	
+	
+	
+
+	
+	/*
+	 * Main app with ngRoute dependency
+	 */
+	var m_app=angular.module("user_main",['ngRoute']);
+	/*
+	 * routing angularJS application with two views 1)home page 2)archive page
+	 * and their respective controllers
+	 */
+	m_app.config(function($routeProvider){
+		$routeProvider
+			.when('/home',{templateUrl:'home',controller:'homeController'})
+			.when('/archive',{templateUrl:'archive',controller:'archiveController'})
+			.otherwise({redirectTo:'/home'});
 	});
 	
-	form_app.controller("user_main_controller",function($scope,$http){
-		$scope.note_title="";
-		$scope.note_content="";
-		$scope.get_contents=function(){
-			
-			$http.get(
-				"@routes.HomeController.getAllPosts",
+	
+	
+	
+	
+	/*
+	 * Services Common to all the controllers under main app
+	 */
+	m_app.service('servicesContainer',function($http){
+		
+		/*
+		 * get notes of a particular user with respect to isArchive flag
+		 * isArchive=1 means get archived data
+		 * isArchive=0 means get un-archived data
+		 */
+		this.get_contents=function(isArchive){
+			var output=$http.get(
+				"@routes.HomeController.getAllPosts"+"?isArchive="+isArchive,
 				{
 					headers:{
 						"Authorization":token,"Content-Type":"application/json"
 					}
 				}
-			).success(function(data,status,headers,config){
+			)
+		//return the $http itself for success and error calls		
+		return output;
+		};
+		
+		/*
+		 * Archive or un-archive a particular post with respect to it's id and flag
+		 * id-> id of the post
+		 * flag->{ 0: means un-archive, 1: archive }
+		 */
+		this.archiveThisPost=function(postId,flag){
+			var output=$http.post("@routes.HomeController.archivePostById",
+			{"postId":postId,"flag":flag},
+			{
+				headers:{
+							"Authorization":token,
+							"Content-Type":"application/json"
+						}
+			}
+			);
+			return output;
+		};
+	
+	
+	});
+	
+	/*
+	 * Controller of archive page
+	 */
+	m_app.controller("archiveController",function($scope,$http,servicesContainer){
+		
+		$("#home").removeClass("active");
+		$("#archive").addClass("active");
+		/*
+		 * get archived contents of a user with respect to his/her token
+		 */
+		$scope.get_contents=function(isArchive){
+			var input=servicesContainer.get_contents(isArchive);
+			input.success(function(data,status,headers,config){
+				/*
+				 * contents is a model in archive page
+				 * which contains particulars of user's post such as 
+				 * 1) id
+				 * 2) title of post
+				 * 3) content of the post
+				 * 4) date of last update
+				 * 5) reminder
+				 * 6) archive flag
+				 */
 				$scope.contents=data;
+				
 			}).error(function(data,status,headers,config){
 				console.log(status);
-			});	
+			});
+			getReminders();
 		};
-		$scope.get_contents();
+		/*
+		 * implict call to get contents of user when the page is loaded
+		 * a flag of "1" is specified mentioning "fetch only archived data"
+		 */
+		$scope.get_contents(1);
+		
+		/*
+		 * un-archives a particular post, triggered by a post's un-archived button
+		 *
+		 */
+		$scope.archiveThisPost=function(postId,flag){
+			var input=servicesContainer.archiveThisPost(postId,flag);
+			input
+			.success(function(data,status,headers,config){
+				closeAllDivs();
+				//generate a noitification saying post is un-archived
+				$.notify("Note un-archived","info");
+				/*
+				 * get the new list of notes that are archived since 
+				 * the call itself un-archives a post with id postId
+				 */
+				$scope.get_contents(1);
+			})
+			.error(function(data,status,headers,config){
+				console.log(status);	
+			});
+		}
+	});
+	
+	/*
+	 * controller for home page
+	 */
+	m_app.controller("homeController",function($scope,$http,servicesContainer,$interval){
+		//global reminder variable
+		var global_reminder="";
+		var global_reminder_update="";
+		/*
+		 * models from pop_up_modal
+		 */
+		$scope.am_pm="am";
+		$scope.user_date="";
+		$scope.hours="";
+		$scope.minutes="";
+		$scope.note_title="";
+		$scope.note_content="";
+		
+		/*
+		 * Setting anchor to active
+		 */
+		$("#home").addClass("active");
+		$("#archive").removeClass("active");
+		
+		
+		
+		
+		/*
+		 * get posts which are un-archived
+		 */
+		
+		$scope.get_contents=function(isArchive){
+			var input=servicesContainer.get_contents(isArchive);
+			input.success(function(data,status,headers,config){
+				/*
+				 * contents is a model in home page
+				 * which contains particulars of user's post such as 
+				 * 1) id
+				 * 2) title of post
+				 * 3) content of the post
+				 * 4) date of last update
+				 * 5) reminder
+				 * 6) archive flag
+				 */
+				$scope.contents=data;	
+				
+			}).error(function(data,status,headers,config){
+				console.log(status);
+			});
+			
+			/*
+			 * Call to fetch all active reminders
+			 */
+			getReminders();
+			
+		};
+		//implicit call to get posts which are marked as un-archive
+		$scope.get_contents(0);
+		
+		/*
+		 * archives a particular post with flag 1
+		 */
+		$scope.archiveThisPost=function(postId,flag){
+			var input=servicesContainer.archiveThisPost(postId,flag);
+			input
+			.success(function(data,status,headers,config){
+				closeAllDivs();
+				//generate a noitification saying post is archived
+				$.notify("Note archived","info");
+				/*
+				 * get the new list of notes that are un-archived since 
+				 * the call itself archives a post with id postId
+				 */
+				$scope.get_contents(0);
+			})
+			.error(function(data,status,headers,config){
+				console.log(status);	
+			});
+		}
+		/*
+		 * triggered by modal's submission
+		 * submits either archived or un-archived post depends which depends on isArchive flag
+		 */
 		$scope.post_contents=function(isArchive){
 			if($scope.note_title!=""|$scope.note_content!=""){
 				$http.post(
 					"@routes.HomeController.addPost",
 					{
-						"title":$scope.note_title,"content":$scope.note_content,"isArchive":isArchive
+						"title":$scope.note_title,"content":$scope.note_content,"isArchive":isArchive,"reminder":global_reminder
 					},
 					{
 						headers:{
@@ -222,49 +422,194 @@ integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
 				).success(function(data, status, headers, config){
 						if(isArchive==1){
 							$.notify("Note archived","success");
-							$("#formModal").modal('hide');
+							
 						}
   						console.log(status);	
-  						$scope.get_contents();
+  						$scope.get_contents(0);
   					})
   				.error(function(data, status, headers, config){
   					console.log(status+" "+data);
   				});
-				
+				$scope.user_date="";
+				$scope.hours="";
+				$scope.minutes="";
 				$scope.note_title="";
 				$scope.note_content="";
-				 
+				global_reminder="";
+				$("#formModal").modal('hide');
 			}
 			
 		};
-		
 		
 		$scope.popUpDiv=function(container){
 			$("#genericModal").modal('show');
 			$scope.generic_title=container['title'];
 			$scope.generic_content=container['content'];
 			$scope.createdDate="Last edited at "+container['date'];
+			$scope.postId=container['postId'];
+			global_reminder_update=container['reminder'];
+			var user_date_c=Number.parseInt(container['reminder']);
+			var date=new Date(user_date_c);
+			$scope.user_date_g=(date.getMonth()+1)+"/"+(date.getDate())+"/"+(date.getYear()+1900);
+			$scope.user_time_g=(date.getHours()+":"+date.getMinutes());
+			$scope.prev_container=container;
 			//If current container is equal to previous container -> give perms to update!
 		}
+		/*
+		 * Triggered by ng-click on Save reminder button of pop_up_modal
+		 */
 		
-		$scope.archiveThisPost=function(postId){
-			$http.post("@routes.HomeController.archivePostById",
-			{"postId":postId},
-			{
-				headers:{
-							"Authorization":token,
-							"Content-Type":"application/json"
-						}
+		
+		/*
+		 * updateReminder ng-click on a particular post,
+		 * pops up a reminder and then updates the reminder if it's valid else nope!
+		 */
+		$scope.updateReminder=function(container){
+			var x=container['postId'];
+			var new_date=$("#rem_date_"+x).val();
+			var new_time=$("#rem_time_"+x).val();
+			var new_date_time=new Date(new_date+" "+new_time).getTime();
+			if(new_date_time<=new Date().getTime()){
+				$.notify("Oops, the time is gone, we cannot bring it back!","warn");
+				return;
 			}
-			).success(function(data,status,headers,config){
-				$scope.get_contents();
-				$.notify("Note archived","info");
+			else{
+				$http.post(
+				"@routes.HomeController.updateReminder",
+				{"postId":x,"reminder":new_date_time},
+				{
+					headers:{
+						"Authorization":token,
+						"Content-Type":"application/json"
+					}
+				}
+				).success(function(data,status,headers,config){
+					$scope.get_contents(0);
+					$.notify("Reminder updated","success");
+						
 			}).error(function(data,status,headers,config){
-				
+				console.log(status);
 			});
+				
+			}
+		}
+		
+		/*
+		 * Save the reminder into a local model 
+		 * check if the date and time are valid, if yes 
+		 * proceed
+		 * else
+		 * throw errors
+		 */
+		$scope.save_reminder_local=function(){
+			
+			$("#datepick").css("border-color","#D6D6D6");
+			$(".user_am_pm").css("border-color","#D6D6D6");
+			
+			if($scope.user_date==""|$scope.hours==""|$scope.minutes==""){
+				$("#datepick").css("border-color","red");
+				$(".user_am_pm").css("border-color","red");
+				return;
+			}
+			else if($scope.hours<1|$scope.hours>12|$scope.minutes>59|$scope.minutes<0){
+				$(".user_am_pm").css("border-color","red");
+				return;
+			}			
+			
+			var t=$scope.user_date+" "+$scope.hours+":"+$scope.minutes+" "+$scope.am_pm;
+			var date=new Date();
+			var user_d=new Date(t);
+			
+		
+			/*
+			 * Date comparsion current date comparsion with reminder date
+			 * if only eligible take them else show error!
+			 */
+		
+			if(user_d.getTime()<date.getTime()){
+				if(user_d.getDate()<date.getDate()|user_d.getMonth()<date.getMonth()|user_d.getYear()<date.getYear()){
+					$("#datepick").css("border-color","red");
+					$.notify("Using a date that's gone long ago?","warn");
+					return;
+				}
+				else{
+					$(".user_am_pm").css("border-color","red");
+					$.notify("We will not be able to create a reminder for that time!","warn");
+					return;		
+				}
+			}
+			else{
+				$("#datepick").css("border-color","green");
+				$(".user_am_pm").css("border-color","green");
+				$.notify("Saving your reminder!","info");
+				global_reminder=user_d.getTime();
+				return;
+			}
+		}
+		
+		$scope.save_reminder_local_generic=function(){
+			var user_gen_date=new Date($scope.user_date_g+" "+$scope.user_time_g).getTime();
+			if(user_gen_date<=new Date().getTime()){
+				$.notify("Cannot save that reminder","warn");
+				return;
+			}
+			else{
+				global_reminder_update=user_gen_date;
+				$.notify("Reminder saved","info");
+			}
+		}
+		
+		$scope.generic_click=function(prev_container){
+			if($scope.generic_title!=prev_container['title']|
+			$scope.generic_content!=prev_container['content']|
+			prev_container['reminder']!=global_reminder_update
+			){
+				var isReminderActive=1;
+				if(prev_container['reminder']!=global_reminder_update){
+					isReminderActive=0;
+				}
+				$http.post("@routes.HomeController.updatePost",
+				{
+					"postId":prev_container['postId'],			/*
+								                                      * String postId=jsonNode.path("postId").asText();
+																    	String title=jsonNode.path("title").asText();
+																    	String content=jsonNode.path("content").asText();
+																    	String reminder=jsonNode.path("reminder").asText();
+																    	Integer isArchive=jsonNode.path("isArchive").asInt();
+																    	Integer isReminderActive=jsonNode.path("isReminderActive").asInt();
+					                                      		*/
+					"title":$scope.generic_title,
+					"content":$scope.generic_content,
+					"reminder":global_reminder_update,
+					"isArchive":0,
+					"isReminderActive":isReminderActive
+				},
+				{
+					headers:{
+						"Authorization":token,
+						"Content-Type":"application/json"
+					},
+				}
+				).success(function(data,status,headers,config){
+				$scope.get_contents(0);
+				$.notify("Note updated","info");
+				closeAllDivs();
+			}).error(function(data,status,headers,config){
+				console.log(status);
+			});
+			}
+			
+			
 		}
 	});
 	
+	/*
+	 * save_reminder_local_generic
+	 */
 	
+	function closeAllDivs(){
+		$("#genericModal").modal("hide");
+		$("#formModal").modal("hide");
+	}
 </script>
 </html>

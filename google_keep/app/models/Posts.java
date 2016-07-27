@@ -25,16 +25,21 @@ public class Posts extends Model{
 	private String date;
 	
 	private String reminder;
+	
+	@Column(columnDefinition="int default 0")
+	private Integer isReminderActive;
+	
 	@Column(columnDefinition="int default 0")
 	private Integer isArchive; 
 	
 	
-	public Posts(AppUsers appUsers,String title,String content,String reminder,Integer isArchive) {
+	public Posts(AppUsers appUsers,String title,String content,String reminder,Integer isArchive,Integer isReminderActive) {
 		this.setAppUsers(appUsers);
 		this.setTitle(title);
 		this.setContent(content);
 		this.setReminder(reminder);
 		this.setIsArchive(isArchive);
+		this.setIsReminderActive(isReminderActive);
 	}
 
 	public int getPostId() {
@@ -91,6 +96,14 @@ public class Posts extends Model{
 
 	public void setAppUsers(AppUsers appUsers) {
 		this.appUsers = appUsers;
+	}
+
+	public Integer getIsReminderActive() {
+		return isReminderActive;
+	}
+
+	public void setIsReminderActive(Integer isReminderActive) {
+		this.isReminderActive = isReminderActive;
 	}
 	
 	//public static Finder<Long, Posts> find=new Finder<Long, Posts>(Posts.class);

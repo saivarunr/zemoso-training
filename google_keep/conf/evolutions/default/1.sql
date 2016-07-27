@@ -20,6 +20,7 @@ create table posts (
   title                         TEXT,
   timestamp                     timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   reminder                      varchar(255),
+  is_reminder_active            int default 0,
   is_archive                    int default 0,
   constraint pk_posts primary key (post_id)
 );

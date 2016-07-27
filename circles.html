@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame 
+       Remove this if you use the .htaccess -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.0/d3.min.js" type="application/javascript"></script>
+  <title>circles</title>
+  <meta name="description" content="">
+  <meta name="author" content="zemoso">
+
+  <meta name="viewport" content="width=device-width; initial-scale=1.0">
+
+  <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+
+<body>
+  <div>
+    
+    <div onclick="circle(event)" style="left:0px;top:0px;width:100%;height:720px">
+      <svg id="circleAdder" width="100%" height="720px">
+      	
+      </svg>
+    </div>
+
+   
+  </div>
+  <script type="application/javascript">
+  	var container=[];
+  	function circle(event){
+  		var xaxis=event.ClientX;
+  		var yaxis=event.ClientY;
+  		push(xaxis,yaxis);
+  	}
+  	function push(x,y){
+  		container.push([x,y]);
+  	}
+  	function display(x,y){
+  		d3.select("#circleAdder").append("circle").attr("id","i"+x+"-"+y).attr("cx",x).attr("cy",y).attr("r",2).style("fill","black");
+  	}
+  	function createCircle(){
+  		
+  	}
+  </script>
+</body>
+
+</html>
