@@ -130,8 +130,8 @@
   					{"username":$scope.username,"password":$scope.password,"email":$scope.email},
   					{headers:{"Content-Type":"application/json"}})
   					.success(function(data, status, headers, config){
-  						
   						$("#buttonDiv").notify("Yay, you've successfully registered!","success",{ position:"left bottom" });
+  						setTimeout(function(){window.location.href="welcome";},2000);
   					})
   				.error(function(data, status, headers, config){
   					$("#buttonDiv").css("display","block");

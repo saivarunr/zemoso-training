@@ -3,7 +3,7 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
+GET     /                           controllers.HomeController.welcome
 GET		/welcome					controllers.HomeController.welcome
 POST	/addUser					controllers.HomeController.addUser
 POST	/login						controllers.HomeController.login
