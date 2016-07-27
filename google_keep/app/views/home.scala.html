@@ -4,6 +4,7 @@
 -moz-box-shadow: -69px 6px 66px -25px rgba(0,0,0,0.53);
 box-shadow: -69px 6px 66px -25px rgba(0,0,0,0.53);
 	}
+	
 </style>
 <div style="left:30%;width:40%;top:95px;position:absolute;height:60px;" align="center">
   			<div class="input-group" id="modalPoper" style="width:90%;top:10px;left:5%;position: absolute">
@@ -13,46 +14,41 @@ box-shadow: -69px 6px 66px -25px rgba(0,0,0,0.53);
 <div style="left:20%;top:160px;width:60%;position: absolute;">
   			<div class="row" style="margin-top:10%;left:0%;width:auto;position: absolute">
   				<div class="col-xs-4 col-md-4" style="min-width: 200px" ng-init="counter=0"ng-repeat="c in contents" style="font-family: Roboto">
-	  				<div class="card card-block">
-	  					<div ng-click="popUpDiv(c)">
-	  						<h4 class="card-title">{{c.title.length>30? (c.title|limitTo:30):(c.title)}}</h4>
-					  		<p class="card-text">{{c.content.length>200? (c.content | limitTo:200):(c.content)}}</p>	
+	  				<div class="card card-block light-shadow"  id="card_{{c.postId}}" onmouseover="addShadow(this.id)" onmouseleave="undoShadow(this.id)">
+	  					<div ng-click="popUpDiv(c)" style="min-height: 10px;min-width: 20px">
+	  						<h4 class="card-title">{{c.title.length>30? (c.title|limitTo:30):(c.title)}}<span ng-if="c.title.length>30">....</span></h4>
+					  		<p class="card-text">{{c.content.length>200? (c.content | limitTo:200):(c.content)}}<span ng-if="c.content.length>200">....</span></p>	
 	  								
 	  					</div>
-					  <i ng-click="archiveThisPost(c.postId,1)" class="fa fa-cloud-download" aria-hidden="true"></i>		
-					  
-					  
-					  <!-- -->
-					  <div class="btn-group">
-						  <i class="fa fa-calendar-plus-o dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true"></i>
-						  <div class="dropdown-menu" align="center">
-						  	<div class="row" style="width:80%;margin-left:10%">
-						  		<div class="col sm-6">
-						  			<label>Date</label>
-						  			<input type="text" id="rem_date_{{c.postId}}" onclick="popUpDate(this.id);" class="form-control rem_date"/>	
-						  		</div>
-						  	</div>
-						  	<div class="row" style="width:80%;margin-left:10%">
-						  		<div class="col sm-6">
-						  			<label>Time</label>
-						  			<input type="text" id="rem_time_{{c.postId}}" onclick="popUpTime(this.id);" class="form-control"/>	
-						  		</div>
-						  	</div>
-						    <div class="dropdown-divider"></div>
-						    	<div class="row" style="width:80%;margin-left:10%">
-							  		<div class="col sm-6">
-							  			<input class="btn btn-primary form-control" type="submit" ng-click="updateReminder(c)" value="Save"/>	
-							  		</div>
-							  	</div>
-						    	
-						  </div>
-					</div>
-					  <!-- -->
-					  
-					  
-						<div ng-if="c.reminder!==''">
-							<div class="reminder-div" style="border-top:solid 1px black;font-size:10px">{{c.reminder | date:"medium"}}</div>
-							
+						<div id="foot_of_card_{{c.postId}}">
+							<i ng-click="archiveThisPost(c.postId,1)" class="fa fa-cloud-download" aria-hidden="true"></i>		
+							  <div class="btn-group">
+								  <i class="fa fa-calendar-plus-o dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true"></i>
+								  <div class="dropdown-menu" align="center">
+								  	<div class="row" style="width:80%;margin-left:10%">
+								  		<div class="col sm-6">
+								  			<label>Date</label>
+								  			<input type="text" id="rem_date_{{c.postId}}" onclick="popUpDate(this.id);" class="form-control rem_date"/>	
+								  		</div>
+								  	</div>
+								  	<div class="row" style="width:80%;margin-left:10%">
+								  		<div class="col sm-6">
+								  			<label>Time</label>
+								  			<input type="text" id="rem_time_{{c.postId}}" onclick="popUpTime(this.id);" class="form-control"/>	
+								  		</div>
+								  	</div>
+								    <div class="dropdown-divider"></div>
+								    	<div class="row" style="width:80%;margin-left:10%">
+									  		<div class="col sm-6">
+									  			<input class="btn btn-primary form-control" type="submit" ng-click="updateReminder(c)" value="Save"/>	
+									  		</div>
+									  	</div>
+								    	
+								  </div>
+							</div>
+						</div>
+						<div ng-if="c.reminder!==''&&c.reminder!=='null'">
+								<div class="reminder-div" style="border-top:solid 1px black;font-size:10px">{{c.reminder | date:"medium"}}</div>
 						</div>
 					</div>
 					
@@ -77,12 +73,12 @@ box-shadow: -69px 6px 66px -25px rgba(0,0,0,0.53);
   <div class="modal-footer">
 <span style="float: left;font-size: 30px">
 <i class="fa fa-cloud-download" ng-click="archiveThisPost(postId,1)" aria-hidden="true"></i>		
-<i class="fa fa-calendar-plus-o"  aria-hidden="true"></i>	
+<i class="fa fa-calendar-plus-o" onclick="reminderStateChanger();" aria-hidden="true"></i>	
 </span>
 
 <button type="button" ng-click="generic_click(prev_container)" class="btn btn-primary">Done</button>
   </div>
-  <div class="modal-footer" id="reminderFooter_1" style="display:">
+  <div class="modal-footer" id="reminderFooter_1" style="display:none">
 <div class="row">
 <div class="col-sm-6">
 <span style="float:left">Set a reminder</span>
@@ -122,11 +118,11 @@ $(function(){
 	});
 });	
 function reminderStateChanger(){
-	if($("#reminderFooter").css("display")=="none"){
-		$("#reminderFooter").css("display","block");
+	if($("#reminderFooter_1").css("display")=="none"){
+		$("#reminderFooter_1").css("display","block");
 	}
 	else{
-		$("#reminderFooter").css("display","none");
+		$("#reminderFooter_1").css("display","none");
 	}
 }
 function changecolor(){

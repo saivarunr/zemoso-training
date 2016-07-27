@@ -1,13 +1,16 @@
 <div style="left:20%;top:60px;width:60%;position: absolute;">
   			<div class="row" style="margin-top:10%;left:0%;width:auto;position: absolute">
   				<div class="col-xs-4 col-md-4" style="min-width: 200px" ng-repeat="c in contents" style="font-family: Roboto">
-	  				<div class="card card-block">
-	  					<div ng-click="popUpDiv(c)">
-	  						<h4 class="card-title">{{c.title.length>30? (c.title|limitTo:30):(c.title)}}</h4>
-					  		<p class="card-text">{{c.content.length>200? (c.content | limitTo:200):(c.content)}}</p>	
+	  				<div class="card card-block light-shadow"  id="card_{{c.postId}}" onmouseover="addShadow(this.id)" onmouseleave="undoShadow(this.id)">
+	  					<div ng-click="popUpDiv(c)" style="min-height: 10px;min-width: 20px">
+	  						<h4 class="card-title">{{c.title.length>30? (c.title|limitTo:30):(c.title)}}<span ng-if="c.title.length>30">....</span></h4>
+					  		<p class="card-text">{{c.content.length>200? (c.content | limitTo:200):(c.content)}}<span ng-if="c.content.length>200">....</span></p>	
+	  								
 	  					</div>
-					  <i ng-click='archiveThisPost(c.postId,0)' class="fa fa-cloud-upload" aria-hidden="true"></i>		
-					  <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
+						<div id="foot_of_card_{{c.postId}}">
+							  <i ng-click='archiveThisPost(c.postId,0)' class="fa fa-cloud-upload" aria-hidden="true"></i>		
+							  <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
+						</div>
 						<div ng-if="c.reminder!==''">
 							<div class="reminder-div" style="border-top:solid 1px;font-size:10px">{{c.reminder | date:'medium'}}</div>
 						</div>
