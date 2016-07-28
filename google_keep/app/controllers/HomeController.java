@@ -31,6 +31,7 @@ import play.libs.Json;
 import play.mvc.*;
 import play.mvc.Http.RequestBody;
 import scala.App;
+import scala.concurrent.java8.FuturesConvertersImpl.P;
 import sun.security.provider.SecureRandom;
 
 import views.html.*;
@@ -247,6 +248,7 @@ public class HomeController extends Controller {
     
     public Result setReminder(){
     	String postId=request().getQueryString("postId");
+    	Integer isReminderActive=Integer.parseInt(request().getQueryString("isReminderActive"));
     	String token=request().getHeader("Authorization");
     	try{
     		
@@ -258,7 +260,7 @@ public class HomeController extends Controller {
 	    			.endJunction()
 	    			.findUnique();
 	    	Ebean.beginTransaction();
-	    		posts.setIsReminderActive(1);
+	    		posts.setIsReminderActive(isReminderActive);
 	    		Ebean.update(posts);
 	    	Ebean.commitTransaction();
 	    	return ok("1");
@@ -332,7 +334,27 @@ public class HomeController extends Controller {
     		return internalServerError(e.toString());
     	}
     }
-    
+    public Result removeReminder(){
+    	String token=request().getHeader("Authorization");
+    	JsonNode jsonNode=request().body().asJson();
+    	String postId=jsonNode.path("postId").asText();
+    	try{
+    		Posts posts=Ebean.find(Posts.class)
+    			.where()
+    				.conjunction()
+    					.eq("postId", postId)
+    					.eq("appUsers", Ebean.find(AppUsers.class).where().eq("token", token).findUnique())
+    				.endJunction()
+    				.findUnique();
+    		posts.setReminder("");
+    		posts.setIsReminderActive(1);
+    		Ebean.save(posts);
+    		return ok("");
+    	}
+    	catch(Exception e){
+    		return badRequest("");
+    	}
+    }
     public Result logout(){
     	if(session("username")!=null){
     		session().clear();

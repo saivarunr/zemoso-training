@@ -26,7 +26,7 @@ GET		/setReminder				controllers.HomeController.setReminder
 POST	/updateReminder				controllers.HomeController.updateReminder
 POST	/updatePost					controllers.HomeController.updatePost
 GET		/logout						controllers.HomeController.logout
-	
+POST	/removeReminder				controllers.HomeController.removeReminder	
 
 
 # An example controller showing how to use dependency injection
