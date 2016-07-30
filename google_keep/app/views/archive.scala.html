@@ -7,7 +7,7 @@
 					  		<p class="card-text">{{c.content.length>200? (c.content | limitTo:200):(c.content)}}<span ng-if="c.content.length>200">....</span></p>	
 	  								
 	  					</div>
-						<div id="foot_of_card_{{c.postId}}">
+						<div>
 							<i ng-click="archiveThisPost(c.postId,0)" class="fa fa-cloud-upload" aria-hidden="true"></i>		
 							  <div class="btn-group">
 								  <i class="fa fa-calendar-plus-o dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true"></i>

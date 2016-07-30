@@ -240,10 +240,14 @@ public class HomeController extends Controller {
     	return badRequest();
     }
     public Result homePage(){
-    	return ok(home.render());
+    	if(session("username")!=null)
+    		return ok(home.render());
+    	return redirect("welcome");
     }
     public Result archivePage(){
-    	return ok(archive.render());
+    	if(session("username")!=null)
+    		return ok(archive.render());
+    	return redirect("welcome");
     }
     
     public Result setReminder(){

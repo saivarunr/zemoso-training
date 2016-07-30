@@ -1,9 +1,97 @@
-<div style="left:30%;width:40%;top:95px;position:absolute;height:60px;" align="center">
-  			<div class="input-group" id="modalPoper" style="width:90%;top:10px;left:5%;position: absolute">
-				<input type="text" ng-click="popUpPost();" class="form-control" placeholder="Add Notes" aria-describedby="basic-addon2">
+<div style="left:0%;width:auto" align="center" id="home_input">
+			<div id="home_input_container">
+				<div class="row">
+  					<div class="col-sm-12">
+  						<textarea id="home_input_title" style="display:none;border:none" rows="1" class="form-control" placeholder="Title"></textarea>
+  					</div>
+  				</div>
+  				<div class="row">
+  					<div class="col-sm-12">
+  						<textarea id="home_input_text" class="text-area  form-control" placeholder="Take a note..."  style="border:none" aria-describedby="basic-addon2"></textarea>	
+  					</div>
+  				</div>
+  				<div class="row" id="home_input_footer" style=";display:none">
+  					<div class="col-sm-12" style="background:white;padding:10px;padding-right:30px;padding-left:30px">
+  						<span style="float:left;padding-left:5px">
+  							<i class="fa fa-calendar-plus-o" style="padding-left:3px;padding-right:3px" aria-labelledby="Remind me" aria-expanded="false" aria-hidden="true"></i>
+							<i class="fa fa-cloud-download"  style="padding-left:3px;padding-right:3px" ng-click="archiveThisPost(postId,1)" aria-hidden="true"></i>  			
+  						</span>  								
+  						<input type="submit" value="Done" id="home_input_submit" style=";border:none;float:right;background-color:white">
+  					</div>
+  				</div>
 			</div>
-  </div> 
-<div style="left:20%;top:160px;width:60%;position: absolute;">
+			<div id="two" style="width:100%;left:0%;margin-top:2%;height:auto">
+				<div class="row" style="margin-top:0%;left:0%;width:auto;position: absolute">
+  				<div class="col-xs-4 col-md-4" ng-init="counter=0"ng-repeat="c in contents" style="font-family: font-family: 'PT Sans', sans-serif;">
+	  				<div class="card card-block light-shadow"  id="card_{{c.postId}}" onmouseover="addShadow(this.id)" onmouseleave="undoShadow(this.id)">
+	  					<div ng-click="popUpDiv(c)" style="min-height: 10px;min-width: 20px">
+	  						<h6 class="card-title">{{c.title.length>30? (c.title|limitTo:60):(c.title)}}<span ng-if="c.title.length>60">....</span></h4>
+					  		<p class="card-text">{{c.content.length>200? (c.content | limitTo:200):(c.content)}}<span ng-if="c.content.length>200">....</span></p>	
+	  								
+	  					</div>
+						<div>
+							<i ng-click="archiveThisPost(c.postId,1)" class="fa fa-cloud-download" aria-hidden="true"></i>		
+							  <div class="btn-group">
+								  <i class="fa fa-calendar-plus-o dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true"></i>
+								  <div class="dropdown-menu" align="center">
+								  	<div class="row" style="width:80%;margin-left:10%">
+								  		<div class="col sm-6">
+								  			<label>Date</label>
+								  			<input type="text" id="rem_date_{{c.postId}}" onclick="popUpDate(this.id);" class="form-control rem_date"/>	
+								  		</div>
+								  	</div>
+								  	<div class="row" style="width:80%;margin-left:10%">
+								  		<div class="col sm-6">
+								  			<label>Time</label>
+								  			<input type="text" id="rem_time_{{c.postId}}" onclick="popUpTime(this.id);" class="form-control"/>	
+								  		</div>
+								  	</div>
+								    <div class="dropdown-divider"></div>
+								    	<div class="row" style="width:80%;margin-left:10%">
+									  		<div class="col sm-6">
+									  			<input class="btn btn-primary form-control" type="submit" ng-click="updateReminder(c)" value="Save"/>	
+									  		</div>
+									  	</div>
+								    	
+								  </div>
+							</div>
+						</div>
+						<div ng-if="c.reminder!==''&&c.reminder!=='null'">
+								<div style="border-top:solid 1px black;font-size:10px" >
+									<div class="reminder-div" id="foot_of_card_{{c.postId}}"  ng-class='{viewed: c.isReminderActive===1, nviewed: c.isReminderActive===-1}'>{{c.reminder | date:"medium"}} </div>	
+									<i class="fa fa-trash" ng-click="removeReminder(c.postId)" style="font-size:15px;margin-left:20%;float:right" aria-hidden="true"></i>
+								</div>
+								
+								
+						</div>
+					</div>
+					
+  				</div>	
+  			</div>
+			</div>
+</div>
+<!--<div id="home_container" align="center">
+  			<div class="input-group" id="home_input_container">
+  				<div class="row">
+  					<div class="col-sm-12">
+  						<input type="text" id="home_input_title" style="display:none;border:none" class="form-control" placeholder="Title" style="border:none">
+  					</div>
+  				</div>
+  				<div class="row">
+  					<div class="col-sm-12">
+  						<textarea id="home_input_text" class="text-area  form-control" placeholder="Take a note..."  style="border:none" aria-describedby="basic-addon2"></textarea>	
+  					</div>
+  				</div>
+  				<div class="row" id="home_input_footer" style=";display:none;">
+  					<div class="col-sm-12" style="background:white;padding-bottom:10px;padding-left:25px;padding-right:25px;overflow:hidden">
+  						<i class="fa fa-calendar-plus-o" style="padding-left:3px;padding-right:3px" aria-labelledby="Remind me" aria-expanded="false" aria-hidden="true"></i>
+						<i class="fa fa-cloud-download"  style="padding-left:3px;padding-right:3px" ng-click="archiveThisPost(postId,1)" aria-hidden="true"></i>  					
+  						<input type="submit" value="Done" id="home_input_submit" style="border:none;float:right;background-color:white">
+  					</div>
+  				</div>
+  			</div>
+  	</div>
+<div style="left:20%;top:140px;width:60%;background:red;height:200px;background:black;position:relative" id="data_container">
   			<div class="row" style="margin-top:10%;left:0%;width:auto;position: absolute">
   				<div class="col-xs-4 col-md-4" style="min-width: 236px" ng-init="counter=0"ng-repeat="c in contents" style="font-family: font-family: 'PT Sans', sans-serif;">
 	  				<div class="card card-block light-shadow"  id="card_{{c.postId}}" onmouseover="addShadow(this.id)" onmouseleave="undoShadow(this.id)">
@@ -41,7 +129,7 @@
 						</div>
 						<div ng-if="c.reminder!==''&&c.reminder!=='null'">
 								<div style="border-top:solid 1px black;font-size:10px" >
-									<div class="reminder-div" id="foot_of_card_{{c.postId}}" ng-class='{viewed: c.isReminderActive===1, nviewed: c.isReminderActive===-1}'>{{c.reminder | date:"medium"}} </div>	
+									<div class="reminder-div" id="foot_of_card_{{c.postId}}"  ng-class='{viewed: c.isReminderActive===1, nviewed: c.isReminderActive===-1}'>{{c.reminder | date:"medium"}} </div>	
 									<i class="fa fa-trash" ng-click="removeReminder(c.postId)" style="font-size:15px;margin-left:20%;float:right" aria-hidden="true"></i>
 								</div>
 								
@@ -52,58 +140,56 @@
   				</div>	
   			</div>
   		
-  			
+  		</div>
+  	-->
+  	
 <!--Generic modal for present elements-->
   <div class="modal fade" id="genericModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog">
-
-<div class="modal-content">
-  <form action="#" method="#">
-  <div class="modal-header">
-<input type="text" ng-model="generic_title" class="form-control" placeholder="Title"/>
-  </div>
-  <div class="modal-body">
-<textarea ng-model="generic_content" rows="7" class="form-control" placeholder="Take a note..."></textarea>
-<span style="float:right" ng-bind="createdDate"></span>
-  </div>
-  
-  <div class="modal-footer">
-<span style="float: left;font-size: 30px">
-<i class="fa fa-cloud-download" ng-click="archiveThisPost(postId,1)" aria-hidden="true"></i>		
-<i class="fa fa-calendar-plus-o" onclick="reminderStateChanger();" aria-hidden="true"></i>	
-</span>
-
-<button type="button" ng-click="generic_click(prev_container)" class="btn btn-primary">Done</button>
-  </div>
-  <div class="modal-footer" id="reminderFooter_1" style="display:none">
-<div class="row">
-<div class="col-sm-6">
-<span style="float:left">Set a reminder</span>
-</div>
-</div>
-<div class="row">
-<div class="col-sm-6">
-<input type="text" ng-model="user_date_g"  placeholder="Pick a date" id="datepick" value="" class="form-control"/>	
-</div>
-<div class="col-sm-6">
-<input type="text" ng-model="user_time_g"  placeholder="Pick a date" onclick="timepickPopUp()" id="timepick" class="form-control"/>
-</div>
-						
-</div>
-<br><button type="button" ng-click="save_reminder_local_generic()" class="btn btn-primary">Save reminder</button>
-  </div>
-  </form>    
-</div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
+	  <div class="modal-dialog">
+	
+		<div class="modal-content">
+		  <form action="#" method="#">
+			  <div class="modal-header">
+					<input type="text" ng-model="generic_title" class="form-control" placeholder="Title"/>
+			  </div>
+		  <div class="modal-body">
+			<textarea ng-model="generic_content" rows="7" class="form-control" placeholder="Take a note..."></textarea>
+			<span style="float:right" ng-bind="createdDate"></span>
+		  </div>
+		  
+		  <div class="modal-footer">
+			<span style="float: left;font-size: 30px">
+				<i class="fa fa-cloud-download" ng-click="archiveThisPost(postId,1)" aria-hidden="true"></i>		
+				<i class="fa fa-calendar-plus-o" onclick="reminderStateChanger();" aria-hidden="true"></i>	
+			</span>
+		
+			<button type="button" ng-click="generic_click(prev_container)" class="btn btn-primary">Done</button>
+		  </div>
+		  <div class="modal-footer" id="reminderFooter_1" style="display:none">
+			<div class="row">
+				<div class="col-sm-6">
+					<span style="float:left">Set a reminder</span>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<input type="text" ng-model="user_date_g"  placeholder="Pick a date" id="datepick" value="" class="form-control"/>	
+				</div>
+				<div class="col-sm-6">
+					<input type="text" ng-model="user_time_g"  placeholder="Pick a date" onclick="timepickPopUp()" id="timepick" class="form-control"/>
+				</div>
+			</div>
+		<br><button type="button" ng-click="save_reminder_local_generic()" class="btn btn-primary">Save reminder</button>
+		  </div>
+		  </form>    
+		</div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-  				
   		
-  		
-  				
-			  			
-</div>
   		
 <script type="application/javascript">
+$('textarea').autogrow({onInitialize: true});
+
 $(function(){
 	$("#datepick").datepicker({
 		minDate:new Date()
@@ -113,4 +199,48 @@ function timepickPopUp(){
 	$("#timepick").timepicker();	
 }
 
+$("#home_input_submit").on('mouseover',function(){
+	$("#home_input_submit_container").css("background","#EBEBEB");
+	$("#home_input_submit").css("background","#EBEBEB");
+});
+$("#home_input_submit").on('mouseout',function(){
+	$("#home_input_submit_container").css("background","white");
+	$("#home_input_submit").css("background","white");
+});
+$(document).on('click',function(e){
+	var home_input_container=$("#home_input_container");
+	if(!home_input_container.is(e.target)&&home_input_container.has(e.target).length===0){
+		$("#home_input_title").css("display","none");
+		$("#home_input_footer").css("display","none");
+		$("#data_container").css("top","140px");
+	}
+	else{
+		var home_input_text=$("#home_input_text").outerHeight();
+		$("#data_container").css("top","100px");
+		$("#home_input_title").css("display","block");
+		$("#home_input_footer").css("display","block");
+		$("#data_container").css("top",(100+$("#home_input_container").outerHeight())+"px");
+	}
+});
+$("#home_input_text").keypress(function(){
+		var home_input_text=$("#home_input_text").outerHeight();
+		$("#data_container").css("top","100px");
+		$("#home_input_title").css("display","block");
+		$("#home_input_footer").css("display","block");
+		$("#data_container").css("top",(100+$("#home_input_container").outerHeight())+"px");
+});
 </script>
+<style type="text/css">  
+    #home_input_title,#home_input_title::-moz-placeholder {  
+      font-family:'Oswald';
+      font-weight:600;
+    }
+    #home_input_text,#home_input_text::-moz-placeholder{
+    	font-family:'PT Sans';
+    	
+    } 
+    #home_input_submit{
+    	font-family:'Lato';
+    	font-weight:300;
+    }
+</style> 
