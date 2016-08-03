@@ -9,8 +9,11 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+
         android:theme="@style/AppTheme">
-        <activity android:name=".LoginActivity">
+        <activity android:name=".LoginActivity"
+            android:screenOrientation="portrait"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -18,6 +21,7 @@
             </intent-filter>
         </activity>
         <activity
+            android:screenOrientation="portrait"
             android:name=".Register"
             android:label="@string/title_activity_register"
             android:parentActivityName=".LoginActivity"
@@ -29,6 +33,7 @@
         <activity
             android:name=".Home"
             android:label="WhatsApp"
+            android:screenOrientation="portrait"
             android:parentActivityName=".LoginActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
