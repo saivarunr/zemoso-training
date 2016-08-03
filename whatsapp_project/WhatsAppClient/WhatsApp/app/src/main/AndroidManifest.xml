@@ -26,6 +26,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zemoso.whatsapp.LoginActivity" />
         </activity>
+        <activity android:name=".Home" />
+        <activity android:name=".Chats" android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Contacts"></activity>
     </application>
 
 </manifest>

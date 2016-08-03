@@ -81,75 +81,77 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
-}
-class LoginValidator extends AsyncTask<Map<String,String>,Void,Boolean>{
-    Context context;
-    View view;
-    public LoginValidator(Context context,View view){
-        this.context=context;
-        this.view=view;
-    }
+    class LoginValidator extends AsyncTask<Map<String,String>,Void,Integer>{
+        Context context;
+        View view;
+        public LoginValidator(Context context,View view){
+            this.context=context;
+            this.view=view;
+        }
 
 
-    @Override
-    protected Boolean doInBackground(Map<String, String>... maps) {
-        HttpURLConnection httpURLConnection=null;
-        OutputStreamWriter outputStreamWriter=null;
-        Map<String,String> map[]=maps;
-        boolean completionFlag=false;
-        try{
-            String serverAddress=ServerDetails.getServerAddress();
-            URL url=new URL(serverAddress+"/login");
-            httpURLConnection=(HttpURLConnection)url.openConnection();
-            httpURLConnection.setRequestMethod("POST");
-            httpURLConnection.setRequestProperty("Content-Type","application/json");
-            httpURLConnection.setDoInput(true);
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.connect();
-            JSONObject jsonObject=new JSONObject(map[0]);
-            outputStreamWriter=new OutputStreamWriter(httpURLConnection.getOutputStream());
-            outputStreamWriter.write(jsonObject.toJSONString());
-            outputStreamWriter.flush();
-            if(httpURLConnection.getResponseCode()==200){
-                InputStream inputStream=new BufferedInputStream(httpURLConnection.getInputStream());
-                InputStreamReader inputStreamReader=new InputStreamReader(inputStream);
-                JSONParser jsonParser=new JSONParser();
-                JSONObject jsonObject1= (JSONObject) jsonParser.parse(inputStreamReader);
-                SharedPreferences sharedPreferences=context.getSharedPreferences("zemoso_whatsapp",Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor=sharedPreferences.edit();
-                editor.putString("token",jsonObject1.get("token").toString());
-                editor.putString("username",map[0].get("username").toString());
-                editor.putString("password",map[0].get("password").toString());
-                editor.commit();
-                completionFlag=true;
-                inputStreamReader.close();
+        @Override
+        protected Integer doInBackground(Map<String, String>... maps) {
+            HttpURLConnection httpURLConnection=null;
+            OutputStreamWriter outputStreamWriter=null;
+            Map<String,String> map[]=maps;
+            Integer status=0;
+            try{
+                String serverAddress=ServerDetails.getServerAddress();
+                URL url=new URL(serverAddress+"/login");
+                httpURLConnection=(HttpURLConnection)url.openConnection();
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setRequestProperty("Content-Type","application/json");
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.connect();
+                JSONObject jsonObject=new JSONObject(map[0]);
+                outputStreamWriter=new OutputStreamWriter(httpURLConnection.getOutputStream());
+                outputStreamWriter.write(jsonObject.toJSONString());
+                outputStreamWriter.flush();
+                status=httpURLConnection.getResponseCode();
+                if(status==200){
+                    InputStream inputStream=new BufferedInputStream(httpURLConnection.getInputStream());
+                    InputStreamReader inputStreamReader=new InputStreamReader(inputStream);
+                    JSONParser jsonParser=new JSONParser();
+                    JSONObject jsonObject1= (JSONObject) jsonParser.parse(inputStreamReader);
+                    SharedPreferences sharedPreferences=context.getSharedPreferences("zemoso_whatsapp",Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor=sharedPreferences.edit();
+                    editor.putString("token",jsonObject1.get("token").toString());
+                    editor.putString("username",map[0].get("username").toString());
+                    editor.putString("password",map[0].get("password").toString());
+                    editor.commit();
+
+                    inputStreamReader.close();
+                }
+
+                outputStreamWriter.close();
+
+            }
+            catch (Exception e){
+
+            }
+            finally {
+                httpURLConnection.disconnect();
             }
 
-            outputStreamWriter.close();
-
-        }
-        catch (Exception e){
-
-        }
-        finally {
-            httpURLConnection.disconnect();
+            return status;
         }
 
-        return completionFlag;
-    }
-
-    @Override
-    protected void onPostExecute(Boolean aBoolean) {
-        super.onPostExecute(aBoolean);
-        if(aBoolean) {
-            Snackbar.make(view,"Valid user",Snackbar.LENGTH_SHORT).show();
-
-            /*
-            Forwarding logic yet to be written
-             */
-        }
-        else{
-            Snackbar.make(view,"Invalid credentials",Snackbar.LENGTH_SHORT).show();;
+        @Override
+        protected void onPostExecute(Integer status) {
+            super.onPostExecute(status);
+            if(status==200) {
+                Intent intent=new Intent(LoginActivity.this,Home.class);
+                context.startActivity(intent);
+                finish();
+            }
+            else if(status==400){
+                Snackbar.make(view,"Invalid credentials",Snackbar.LENGTH_SHORT).show();
+            }
+            else{
+                Snackbar.make(view,"Oops, looks like server's down :( ",Snackbar.LENGTH_SHORT).show();
+            }
         }
     }
 }
