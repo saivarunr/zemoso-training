@@ -1,6 +1,11 @@
 @(Welcome:String)
 <!DOCTYPE html>
 <html lang="en">
+	<style>
+			#name_container{
+		z-index:100;left:0px;top:0px;width: 100%;height:65px;position: fixed;background-color: rgb(255, 187, 0);
+	}
+	</style>
 <head>
   <meta charset="utf-8">
 
@@ -49,13 +54,15 @@
 
 <body>
   <div style="left:0px;top:0px;width: 100%;height: auto;position: absolute">
-  	<div style="left:0px;top:0px;width: 100%;height:10%;position: fixed;background:#EDC82E;">
-  			<div style="left:0px;top:0px;left:0px;width: auto;position: absolute">
-  				<p style="font-family: 'Oswald', sans-serif;font-size: 30px;color:white;">Notes &#64; ZeMoSo</p>	
+  	<div id="name_container">
+  			<div style="left:0px;top:0px;left:0px;width:auto;position: absolute">
+  				<div style="margin-left:5%;margin-top:15px">
+  					<div style="margin-top:0px">
+  						<span style="font-family: 'Oswald', sans-serif;font-size: 25px;color:black;margin-left:10px">ZeMoSo</span>	
+  					</div>
+  				</div>  		
   			</div>
-  			
-  	</div>
-  	<div style="left:0px;top:0px;width: 100%;height:90px;z-index:-1;position: absolute;background: #D2AE29"></div>
+	  	</div>
   	<div style="left:0px;top:90px;width: 100%;height:auto">
   		<div style="left:0px;width:100%;top:90px;position:absolute;height: 400px;" align="center">
   			<div style="left:30%;width: 40%;top:40px;position: absolute;height: 360px;background: #F7F7F7" ng-app="formApp" ng-controller="formController">
@@ -116,35 +123,6 @@
   		</div>
   	</div>
   </div>
-  <script>
-  	var formApp=angular.module("formApp",[]);
-  	formApp.controller("formController",function($scope,$http){
-  		$scope.caller=function(){
-  			$but1=$("#submitButton").button('loading');
-  			if(typeof $scope.username!="undefined"&&typeof $scope.password!="undefined"&&typeof $scope.confirmpassword!="undefined" &&typeof $scope.email!="undefined" ){
-  				if($scope.password==$scope.confirmpassword){
-  					$("#buttonDiv").css("display","none");
-  					$("#spinnerDiv").css("display","block");
-  		$http.post("addUser",
-  					{"username":$scope.username,"password":$scope.password,"email":$scope.email},
-  					{headers:{"Content-Type":"application/json"}})
-  					.success(function(data, status, headers, config){
-  						$("#buttonDiv").notify("Yay, you've successfully registered!","success",{ position:"left bottom" });
-  						setTimeout(function(){window.location.href="welcome";},1500);
-  					})
-  				.error(function(data, status, headers, config){
-  					$("#buttonDiv").css("display","block");
-  					
-  					$.notify(data,"warn",{ position:"left" });
-  				});
-  					$("#spinnerDiv").css("display","none");			
-  					
-  				}
-  			}
-  		}
-  	});
-  	
-  	
-  </script>
+  <script src="assets/newRegister.js"></script>
 </body>
 </html>

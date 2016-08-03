@@ -334,7 +334,8 @@ public class HomeController extends Controller {
 	    	return ok("");
     	}
     	catch(Exception e){
-    		Ebean.rollbackTransaction();
+    		e.printStackTrace();
+    		//Ebean.rollbackTransaction();
     		return internalServerError(e.toString());
     	}
     }

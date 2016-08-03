@@ -1,6 +1,11 @@
 @(Welcome:String, Check:String)
 <!DOCTYPE html>
 <html lang="en">
+	<style>
+			#name_container{
+		z-index:100;left:0px;top:0px;width: 100%;height:65px;position: fixed;background-color: rgb(255, 187, 0);
+	}
+	</style>
 <head>
   <meta charset="utf-8">
 <!-- jQuery-->
@@ -45,13 +50,15 @@
 
 <body>
   <div style="left:0px;top:0px;width: 100%;height: auto;position: absolute">
-  	<div style="left:0px;top:0px;width: 100%;height:10%;position: fixed;background:#EDC82E;">
-  			<div style="left:0px;top:0px;left:0px;width: auto;position: absolute">
-  				<p style="font-family: 'Oswald', sans-serif;font-size: 30px;color:white;">Notes &#64; ZeMoSo</p>	
+  	<div id="name_container">
+  			<div style="left:0px;top:0px;left:0px;width:auto;position: absolute">
+  				<div style="margin-left:5%;margin-top:15px">
+  					<div style="margin-top:0px">
+  						<span style="font-family: 'Oswald', sans-serif;font-size: 25px;color:black;margin-left:10px">ZeMoSo</span>	
+  					</div>
+  				</div>  		
   			</div>
-  			
-  	</div>
-  	<div style="left:0px;top:0px;width: 100%;height:90px;z-index:-1;position: absolute;background: #D2AE29"></div>
+	  	</div>
   	<div style="left:0px;top:90px;width: 100%;height:auto">
   		<div style="left:0px;width:100%;top:90px;position:absolute;height: 400px;" align="center">
   			<div style="left:30%;width: 40%;top:40px;position: absolute;height: 250px;background: #F7F7F7">
