@@ -39,6 +39,14 @@ public class LoginActivity extends AppCompatActivity {
     String getPassword(){
         return password.getText().toString();
     }
+    Map<String,String> map;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e("onResume","resumed");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(view.getContext(),"Password cannot be empty",Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Map<String,String> map=new HashMap<String, String>();
+                map=new HashMap<String, String>();
                 map.put("username",username);
                 map.put("password",password);
                 new LoginValidator(view.getContext(),view).execute(map);
