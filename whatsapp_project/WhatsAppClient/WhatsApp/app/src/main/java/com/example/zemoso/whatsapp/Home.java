@@ -1,5 +1,13 @@
 package com.example.zemoso.whatsapp;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,6 +19,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,8 +27,32 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.ExecutionException;
+
+import ClientRes.DatabaseHelper;
+import ClientRes.ServerDetails;
 
 public class Home extends AppCompatActivity {
+    class MessageGetter extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String data=intent.getStringExtra("data");
+            //Toast.makeText(Home.this,data,Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -35,7 +68,8 @@ public class Home extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-
+    MessageGetter messageGetter;
+    IntentFilter intentFilter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +80,16 @@ public class Home extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
+        SharedPreferences sharedPreferences=getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
+        String token=sharedPreferences.getString("token","null");
+        String username=sharedPreferences.getString("username","");
+        try {
+            boolean x=new UsernameGetter(this,username).execute(token).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
@@ -55,10 +99,19 @@ public class Home extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -131,6 +184,8 @@ public class Home extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
+            if(position==1)
+                return new UsersFragment();
             return PlaceholderFragment.newInstance(position + 1);
         }
 
@@ -151,5 +206,54 @@ public class Home extends AppCompatActivity {
             }
             return null;
         }
+    }
+}
+class UsernameGetter extends AsyncTask<String,Void,Boolean>{
+    DatabaseHelper databaseHelper=null;
+    org.json.simple.JSONArray jsonArray=null;
+    UsernameGetter(Context context,String username){
+        databaseHelper=new DatabaseHelper(context,username);
+    }
+
+    @Override
+    protected Boolean doInBackground(String... strings) {
+        boolean completionFlag=false;
+        String token=strings[0];
+        HttpURLConnection httpURLConnection=null;
+
+        try{
+            String serverAddress= ServerDetails.getServerAddress();
+            URL url=new URL(serverAddress+"/getUsers");
+            httpURLConnection= (HttpURLConnection) url.openConnection();
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("Authorization",token);
+            httpURLConnection.setDoInput(true);
+            httpURLConnection.connect();
+            if(httpURLConnection.getResponseCode()==200){
+                InputStreamReader inputStreamReader=new InputStreamReader(httpURLConnection.getInputStream());
+                JSONParser jsonParser=new JSONParser();
+                jsonArray= (org.json.simple.JSONArray) jsonParser.parse(inputStreamReader);
+                inputStreamReader.close();
+                int size=jsonArray.size();
+                Log.e("jsonArray",jsonArray.toJSONString());
+                for(int i=0;i<size;i++){
+                    String username=jsonArray.get(i).toString();
+                    if(!databaseHelper.containsUser(username))
+                        databaseHelper.addUser(username);
+                }
+
+                completionFlag=true;
+            }
+
+
+        }
+        catch (Exception e){
+            Log.e("Exception",e.toString());
+        }
+        finally {
+            databaseHelper.close();
+            httpURLConnection.disconnect();
+        }
+        return completionFlag;
     }
 }

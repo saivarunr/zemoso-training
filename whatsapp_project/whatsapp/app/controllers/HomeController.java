@@ -86,9 +86,7 @@ public class HomeController extends Controller {
     public Result getUsers(){
     	String token=request().getHeader("Authorization");
     	try{
-    		List<Object> l=Ebean.find(Users.class).select("username").where()
-    				.ne("username", Ebean.find(Users.class).where().eq("token", token).findUnique().getUsername())
-    				.findIds();
+    		List<Object> l=Ebean.find(Users.class).select("username").where().findIds();
     		return ok(Json.toJson(l));
     	}
     	catch(Exception e){
@@ -124,33 +122,22 @@ public class HomeController extends Controller {
     public Result getMessagesOf(){
     	String token=request().getHeader("Authorization");
     	String target=request().getQueryString("target");
+    	Integer integer[];
     	try{
     		List<Messages> list=Ebean.find(Messages.class).where()
-    			.disjunction()	
-	    			.conjunction()
-	    				.eq("sender",Ebean.find(Users.class).where().eq("token", token).findUnique())
-	    				.eq("reciever",Ebean.find(Users.class).where().eq("username",target).findUnique())
-	    			.endJunction()
 	    			.conjunction()
 	    				.eq("reciever",Ebean.find(Users.class).where().eq("token", token).findUnique())
 	    				.eq("sender",Ebean.find(Users.class).where().eq("username",target).findUnique())
+	    				.eq("requested",0)
 	    			.endJunction()
-	    		.endJunction()
+	    		.orderBy("timestamp")
     		.findList();
-    		List <Map<Integer, String>> ll=new ArrayList<Map<Integer,String>>();
     		for(Messages messages:list){
-    			Map<Integer, String> map=new HashMap<Integer, String>();
-    			String sender=messages.getSender().getToken();
-    			String message=messages.getMessage();
-    			if(sender.equals(token)){
-    				map.put(0,message);
-    			}
-    			else{
-    				map.put(1, message);
-    			}
-    			ll.add(map);
+    			Messages messages2=Ebean.find(Messages.class).where().eq("id",messages.getId()).findUnique();
+    			messages2.setRequested(1);
+    			Ebean.save(messages2);
     		}
-    		return ok(Json.toJson(ll));
+    		return ok(Json.toJson(list));
     	}
     	catch(Exception e){
     		ObjectNode node=Json.newObject();

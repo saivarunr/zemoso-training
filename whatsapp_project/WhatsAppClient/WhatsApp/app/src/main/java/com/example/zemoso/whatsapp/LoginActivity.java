@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -27,6 +30,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import ClientRes.DatabaseHelper;
 import ClientRes.ServerDetails;
 
 public class LoginActivity extends AppCompatActivity {
@@ -41,17 +45,18 @@ public class LoginActivity extends AppCompatActivity {
     }
     Map<String,String> map;
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.e("onResume","resumed");
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         StrictMode.ThreadPolicy threadPolicy=new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(threadPolicy);
+        SharedPreferences sharedPreferences=getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
+        String userToken=sharedPreferences.getString("token",null);
+        if(userToken!=null){
+            this.startActivity(new Intent(LoginActivity.this,Home.class));
+            finish();
+        }
         setContentView(R.layout.activity_login);
         username=(EditText)findViewById(R.id.username);
         password=(EditText)findViewById(R.id.password);
@@ -150,6 +155,7 @@ public class LoginActivity extends AppCompatActivity {
         protected void onPostExecute(Integer status) {
             super.onPostExecute(status);
             if(status==200) {
+
                 Intent intent=new Intent(LoginActivity.this,Home.class);
                 context.startActivity(intent);
                 finish();

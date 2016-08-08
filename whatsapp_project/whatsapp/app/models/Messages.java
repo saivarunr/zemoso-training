@@ -28,27 +28,52 @@ public class Messages extends Model{
 	@Column(name="timestamp",columnDefinition="timestamp DEFAULT CURRENT_TIMESTAMP")
 	String timestamp;
 	
+	@Column(name="requested",columnDefinition="integer default 0")
+	private
+	Integer requested;
 	public Messages(Users sender,Users reciever,String message){
 		setSender(sender);
 		setReciever(reciever);
 		setMessage(message);
+		setRequested(0);
 	}
-	public Users getSender() {
+	 Users getSender() {
 		return sender;
 	}
-	public void setSender(Users sender) {
+	 public String getTimestamp(){
+		 return this.timestamp;
+	 }
+	 void setSender(Users sender) {
 		this.sender = sender;
 	}
-	public Users getReciever() {
+	 Users getReciever() {
 		return reciever;
 	}
-	public void setReciever(Users reciever) {
+	 void setReciever(Users reciever) {
 		this.reciever = reciever;
+	}
+	public String getSenderName(){
+		return this.sender.getUsername();
+	}
+	public String getRecieverName(){
+		return this.reciever.getUsername();
 	}
 	public String getMessage() {
 		return message;
 	}
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	public Integer getRequested() {
+		return requested;
+	}
+	public void setRequested(Integer requested) {
+		this.requested = requested;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

@@ -9,6 +9,7 @@ create table messages (
   reciever_username             varchar(255),
   message                       TEXT,
   timestamp                     timestamp DEFAULT CURRENT_TIMESTAMP,
+  requested                     integer default 0,
   constraint pk_messages primary key (id)
 );
 
