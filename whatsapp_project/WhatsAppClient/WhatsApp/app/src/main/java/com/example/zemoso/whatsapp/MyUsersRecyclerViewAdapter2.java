@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.zemoso.whatsapp.UsersFragment2.OnListFragmentInteractionListener;
-import com.example.zemoso.whatsapp.dummy.DummyContent.DummyItem;
+
 
 import java.util.List;
 

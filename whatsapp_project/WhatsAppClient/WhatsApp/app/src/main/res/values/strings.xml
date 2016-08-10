@@ -8,4 +8,5 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_user_chat">UserChat</string>
+    <string name="title_activity_generic_user_chat">GenericUserChat</string>
 </resources>

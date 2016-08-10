@@ -83,13 +83,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return false;
         return true;
     }
-
     public void addMessage(String source,String target,String message){
         SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
         ContentValues contentValues=new ContentValues();
         contentValues.put("source",source);
         contentValues.put("target",target);
         contentValues.put("message",message);
+        try{
+            sqLiteDatabase.insert(SECOND_TABLE,null,contentValues);
+        }
+        catch (Exception e){
+
+        }
+        sqLiteDatabase.close();
+    }
+    public void addMessage(String source,String target,String message,String timestamp){
+        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+        ContentValues contentValues=new ContentValues();
+        contentValues.put("source",source);
+        contentValues.put("target",target);
+        contentValues.put("message",message);
+        contentValues.put("timestamp",timestamp);
         try{
             sqLiteDatabase.insert(SECOND_TABLE,null,contentValues);
         }

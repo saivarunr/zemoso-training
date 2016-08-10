@@ -2,6 +2,10 @@ package ClientRes;
 
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by zemoso on 6/8/16.
  */
@@ -42,8 +46,10 @@ public class UserMessages {
         this.message = message;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public Date getTimestamp() throws ParseException {
+        SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:SS");
+        Date d=dateFormat.parse(timestamp);
+        return d;
     }
 
     public void setTimestamp(String timestamp) {

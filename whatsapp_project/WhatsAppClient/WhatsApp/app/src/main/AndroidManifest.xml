@@ -37,26 +37,25 @@
             android:parentActivityName=".LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zemoso.whatsapp.LoginActivity" />
         </activity>
         <activity android:name=".DatabaseActivity" />
+
+        <service android:name=".MessageGetterService" />
+
+        <activity android:name=".UserChatHistory" />
         <activity
-            android:name=".UserChat"
-            android:label="@string/title_activity_user_chat"
+            android:name=".GenericUserChat"
+            android:label="@string/title_activity_generic_user_chat"
             android:parentActivityName=".Home"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.GET_CONTENT"></action>
-                <category android:name="android.intent.category.LAUNCHER"></category>
-            </intent-filter>
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zemoso.whatsapp.Home" />
         </activity>
-    <service android:name=".MessageGetterService"/>
+        <activity android:name=".FetchContacts"></activity>
     </application>
 
 </manifest>

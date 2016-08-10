@@ -110,7 +110,7 @@ public class UsersFragment extends Fragment {
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), recyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                Intent intent=new Intent(getActivity(),UserChat.class);
+                Intent intent=new Intent(getActivity(),GenericUserChat.class);
                 intent.putExtra("USERNAME",usersList.get(position).getUsername());
                 view.getContext().startActivity(intent);
             }

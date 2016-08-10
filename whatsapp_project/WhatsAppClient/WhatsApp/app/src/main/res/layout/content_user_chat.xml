@@ -19,13 +19,14 @@
         android:fillViewport="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="60dp"
+
         >
        <LinearLayout
            android:layout_width="match_parent"
-           android:layout_height="match_parent"
+           android:layout_height="wrap_content"
            android:id="@+id/textViewContainer"
+           android:gravity="bottom"
            android:orientation="vertical">
-
        </LinearLayout>
     </ScrollView>
     <LinearLayout
@@ -45,10 +46,10 @@
             android:layout_toStartOf="@+id/sendButton"
             android:layout_weight="0.98" />
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:id="@+id/sendButton"
-            android:text="send"
+            android:background="@drawable/navigationarrow"
             android:layout_alignBottom="@+id/userChatText"
             android:layout_alignEnd="@+id/scrollView" />
     </LinearLayout>

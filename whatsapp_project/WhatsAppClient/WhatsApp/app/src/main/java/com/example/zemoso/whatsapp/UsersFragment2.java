@@ -12,8 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.zemoso.whatsapp.dummy.DummyContent;
-import com.example.zemoso.whatsapp.dummy.DummyContent.DummyItem;
+
 
 import java.util.List;
 
@@ -67,7 +66,7 @@ SharedPreferences sharedPreferences;
         String username=sharedPreferences.getString("username","");
         View view = inflater.inflate(R.layout.fragment_users_list2, container, false);
         DatabaseHelper databaseHelper = new DatabaseHelper(view.getContext(),username);
-        usersList=databaseHelper.getMostRecent();
+        usersList=databaseHelper.getAllUsersExcept(username);
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
@@ -83,7 +82,7 @@ SharedPreferences sharedPreferences;
         recyclerView.addOnItemTouchListener(new UsersFragment.RecyclerTouchListener(getContext(), recyclerView, new UsersFragment.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                Intent intent=new Intent(getActivity(),UserChat.class);
+                Intent intent=new Intent(getActivity(),GenericUserChat.class);
                 intent.putExtra("USERNAME",usersList.get(position).getUsername());
                 view.getContext().startActivity(intent);
             }

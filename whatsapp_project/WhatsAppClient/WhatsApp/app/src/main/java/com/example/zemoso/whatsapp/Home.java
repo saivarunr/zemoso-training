@@ -78,18 +78,13 @@ public class Home extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        Intent intent=getIntent();
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         SharedPreferences sharedPreferences=getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
         String token=sharedPreferences.getString("token","null");
         String username=sharedPreferences.getString("username","");
-        try {
-            boolean x=new UsernameGetter(this,username).execute(token).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
@@ -206,54 +201,5 @@ public class Home extends AppCompatActivity {
             }
             return null;
         }
-    }
-}
-class UsernameGetter extends AsyncTask<String,Void,Boolean>{
-    DatabaseHelper databaseHelper=null;
-    org.json.simple.JSONArray jsonArray=null;
-    UsernameGetter(Context context,String username){
-        databaseHelper=new DatabaseHelper(context,username);
-    }
-
-    @Override
-    protected Boolean doInBackground(String... strings) {
-        boolean completionFlag=false;
-        String token=strings[0];
-        HttpURLConnection httpURLConnection=null;
-
-        try{
-            String serverAddress= ServerDetails.getServerAddress();
-            URL url=new URL(serverAddress+"/getUsers");
-            httpURLConnection= (HttpURLConnection) url.openConnection();
-            httpURLConnection.setRequestMethod("GET");
-            httpURLConnection.setRequestProperty("Authorization",token);
-            httpURLConnection.setDoInput(true);
-            httpURLConnection.connect();
-            if(httpURLConnection.getResponseCode()==200){
-                InputStreamReader inputStreamReader=new InputStreamReader(httpURLConnection.getInputStream());
-                JSONParser jsonParser=new JSONParser();
-                jsonArray= (org.json.simple.JSONArray) jsonParser.parse(inputStreamReader);
-                inputStreamReader.close();
-                int size=jsonArray.size();
-                Log.e("jsonArray",jsonArray.toJSONString());
-                for(int i=0;i<size;i++){
-                    String username=jsonArray.get(i).toString();
-                    if(!databaseHelper.containsUser(username))
-                        databaseHelper.addUser(username);
-                }
-
-                completionFlag=true;
-            }
-
-
-        }
-        catch (Exception e){
-            Log.e("Exception",e.toString());
-        }
-        finally {
-            databaseHelper.close();
-            httpURLConnection.disconnect();
-        }
-        return completionFlag;
     }
 }
