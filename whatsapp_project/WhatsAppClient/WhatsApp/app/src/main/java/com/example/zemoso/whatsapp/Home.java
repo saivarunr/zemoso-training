@@ -79,6 +79,8 @@ public class Home extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         Intent intent=getIntent();
+        Intent intent1=new Intent(Home.this,GetAllMessagesService.class);
+        startService(intent1);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         SharedPreferences sharedPreferences=getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
@@ -180,7 +182,7 @@ public class Home extends AppCompatActivity {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             if(position==1)
-                return new UsersFragment();
+                return new Contacts();
             return new MostRecentUser();
         }
 

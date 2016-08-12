@@ -63,7 +63,8 @@ public class MostRecentUserAdapter extends BaseAdapter {
         textView2= (TextView) view.findViewById(R.id.usernameMessageTime);
         textView.setText(usernames.get(i));
         final String username=usernames.get(i);
-        textView1.setText(recentMessages.get(i));
+        String text_setter=(recentMessages.get(i).length()>30)?recentMessages.get(i).substring(0,30)+"...":recentMessages.get(i);
+        textView1.setText(text_setter);
         textView2.setText(DateUtils.getRelativeTimeSpanString(times.get(i).getTime(),System.currentTimeMillis(),DateUtils.MINUTE_IN_MILLIS));
         textView.getRootView().setOnClickListener(new View.OnClickListener() {
             @Override

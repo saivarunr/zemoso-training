@@ -56,6 +56,20 @@
                 android:value="com.example.zemoso.whatsapp.Home" />
         </activity>
         <activity android:name=".FetchContacts"></activity>
+        <receiver android:name=".GenericUserChat$GenericUserDataBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name=".GetAllMessagesService"></action>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".MostRecentUser$AllMessagesReceiver" android:enabled="true" android:exported="true">
+            <intent-filter>
+                <action android:name=".GetAllMessagesService"></action>
+            </intent-filter>
+
+        </receiver>
+        <service android:name=".GetAllMessagesService" android:enabled="true" android:exported="true"></service>
     </application>
 
 </manifest>

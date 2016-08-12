@@ -69,7 +69,7 @@ public class MessageGetterService extends Service {
 
                     intent=new Intent();
                     intent.setAction(BroadcastFilter);
-                    new MessageGetterHttpService().execute(targetUsername);
+                   // new MessageGetterHttpService().execute(targetUsername);
                     Thread.sleep(5000);
                 }
             }
@@ -79,61 +79,5 @@ public class MessageGetterService extends Service {
         }
     }
 
-class MessageGetterHttpService extends AsyncTask<String,Void,Boolean>{
-    Boolean completionFlag=false;
-    HttpURLConnection httpURLConnection=null;
-    JSONArray jsonArray=null;
-    SharedPreferences sharedPreferences = getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
-    String token=sharedPreferences.getString("token","");
 
-    @Override
-    protected Boolean doInBackground(String... strings) {
-        try{
-            String serverAddress=ServerDetails.getServerAddress();
-            String newUrl=serverAddress+"/getMessagesOf"+"?target="+strings[0];
-            URL url=new URL(newUrl);
-            httpURLConnection= (HttpURLConnection) url.openConnection();
-            httpURLConnection.setRequestMethod("GET");
-            httpURLConnection.addRequestProperty("Authorization",token);
-            httpURLConnection.addRequestProperty("Content-Type","application/json");
-            httpURLConnection.setDoInput(true);
-            httpURLConnection.connect();
-
-            if(httpURLConnection.getResponseCode()==200){
-                InputStreamReader inputStreamReader=new InputStreamReader(httpURLConnection.getInputStream());
-                JSONParser jsonParser=new JSONParser();
-                jsonArray= (JSONArray) jsonParser.parse(inputStreamReader);
-
-                inputStreamReader.close();
-
-                completionFlag=true;
-            }
-
-
-        }
-        catch (Exception e){
-            Log.e("ex",e.toString());
-        }
-        finally {
-            httpURLConnection.disconnect();
-        }
-
-        return  completionFlag;
-    }
-
-    @Override
-    protected void onPostExecute(Boolean aBoolean) {
-        super.onPostExecute(aBoolean);
-
-        if(aBoolean){
-            String jsonString=jsonArray.toJSONString();
-            intent.putExtra("jsons",jsonString);
-            sendBroadcast(intent);
-
-        }
-        else{
-            Log.e("json Array","No data");
-        }
-    }
-}
 }

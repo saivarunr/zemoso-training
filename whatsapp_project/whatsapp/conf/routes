@@ -16,3 +16,4 @@ POST	/newUser					controllers.HomeController.newUser
 GET		/getUsers					controllers.HomeController.getUsers
 POST	/postMessage				controllers.HomeController.postMessage
 GET		/getMessagesOf				controllers.HomeController.getMessagesOf
+GET		/getAllMessages				controllers.HomeController.getAllMessages

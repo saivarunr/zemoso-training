@@ -122,7 +122,6 @@ public class HomeController extends Controller {
     public Result getMessagesOf(){
     	String token=request().getHeader("Authorization");
     	String target=request().getQueryString("target");
-    	Integer integer[];
     	try{
     		List<Messages> list=Ebean.find(Messages.class).where()
 	    			.conjunction()
@@ -145,5 +144,27 @@ public class HomeController extends Controller {
     		return badRequest(node);
     	}
     }
-
+    public Result getAllMessages(){
+    	String token=request().getHeader("Authorization");
+    	try{
+    		List<Messages> list=Ebean.find(Messages.class).where()
+	    			.conjunction()
+	    				.eq("reciever",Ebean.find(Users.class).where().eq("token", token).findUnique())
+	    				.eq("requested",0)
+	    			.endJunction()
+	    		.orderBy("timestamp")
+    		.findList();
+    		for(Messages messages:list){
+    			Messages messages2=Ebean.find(Messages.class).where().eq("id",messages.getId()).findUnique();
+    			messages2.setRequested(1);
+    			Ebean.save(messages2);
+    		}
+    		return ok(Json.toJson(list));
+    	}
+    	catch(Exception e){
+    		ObjectNode node=Json.newObject();
+    		node.put("message", "failed");
+    		return badRequest(node);
+    	}
+    }
 }

@@ -53,8 +53,17 @@ public class GenericUserChat extends AppCompatActivity {
     String username=null;
     UserSpecificMessageGetter userSpecificMessageGetter=null;
     IntentFilter intentFilter=null;
+   public class GenericUserDataBroadcastReceiver extends BroadcastReceiver{
 
-
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String data=intent.getStringExtra("data");
+            if(data.equals("saved")){
+                loadData();
+            }
+        }
+    }
+    public GenericUserDataBroadcastReceiver genericUserDataBroadcastReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,16 +90,20 @@ public class GenericUserChat extends AppCompatActivity {
         token=sharedPreferences.getString("token","");
         username=sharedPreferences.getString("username","");
         databaseHelper=new DatabaseHelper(this,username);
-        loadData();
-        userSpecificMessageGetter=new UserSpecificMessageGetter();
+        genericUserDataBroadcastReceiver=new GenericUserDataBroadcastReceiver();
         intentFilter=new IntentFilter();
-        intentFilter.addAction(MessageGetterService.BroadcastFilter);
+        intentFilter.addAction(GetAllMessagesService.BroadcastReceiver);
+        /*userSpecificMessageGetter=new UserSpecificMessageGetter();
+        intentFilter=new IntentFilter();
+        intentFilter.addAction(MessageGetterService.BroadcastFilter);*/
         /*
         Start service
          */
-        Intent intent=new Intent(GenericUserChat.this,MessageGetterService.class);
+
+
+        /*Intent intent=new Intent(GenericUserChat.this,MessageGetterService.class);
         intent.putExtra("target",targetUsername);
-        startService(intent);
+        startService(intent);*/
 
         /*
             Load previous chat history from DB into the adapter
@@ -116,16 +129,17 @@ public class GenericUserChat extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        registerReceiver(genericUserDataBroadcastReceiver,intentFilter);
 
 
-
-        registerReceiver(userSpecificMessageGetter,intentFilter);
+        //registerReceiver(userSpecificMessageGetter,intentFilter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(userSpecificMessageGetter);
+        unregisterReceiver(genericUserDataBroadcastReceiver);
+        //unregisterReceiver(userSpecificMessageGetter);
     }
 
     private void publishData(String data) {

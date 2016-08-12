@@ -1,6 +1,9 @@
 package com.example.zemoso.whatsapp;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,12 +41,18 @@ public class MostRecentUser extends ListFragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    public AllMessagesReceiver allMessagesReceiver;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
-
+    IntentFilter intentFilter;
+    ArrayList<String> usernames=null;
+    ArrayList<String> lastMessages=null;
+    ArrayList<Date> times=null;
+    MostRecentUserAdapter mostRecentUserAdapter=null;
+    String username=null;
     public MostRecentUser() {
         // Required empty public constructor
     }
@@ -69,6 +78,10 @@ public class MostRecentUser extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        allMessagesReceiver=new AllMessagesReceiver();
+        intentFilter=new IntentFilter();
+        intentFilter.addAction(GetAllMessagesService.BroadcastReceiver);
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -79,12 +92,12 @@ public class MostRecentUser extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        ArrayList<String> usernames=new ArrayList<>();
-        ArrayList<String> lastMessages=new ArrayList<>();
-        ArrayList<Date> times=new ArrayList<>();
+        usernames=new ArrayList<>();
+        lastMessages=new ArrayList<>();
+        times=new ArrayList<>();
 
         SharedPreferences sharedPreferences=getActivity().getSharedPreferences("zemoso_whatsapp",getContext().MODE_PRIVATE);
-        String username=sharedPreferences.getString("username","");
+        username=sharedPreferences.getString("username","");
         DatabaseHelper databaseHelper=new DatabaseHelper(getContext(),username);
         List<MostRecentUserWrapper> usersList=databaseHelper.getMostRecent();
         usernames.clear();
@@ -95,9 +108,23 @@ public class MostRecentUser extends ListFragment {
             lastMessages.add(usersList.get(i).getMessage());
             times.add(usersList.get(i).getDate());
         }
-        MostRecentUserAdapter mostRecentUserAdapter=new MostRecentUserAdapter(getActivity(),usernames,lastMessages,times);
+        mostRecentUserAdapter=new MostRecentUserAdapter(getActivity(),usernames,lastMessages,times);
         setListAdapter(mostRecentUserAdapter);
+        AllMessagesReceiver allMessagesReceiver = new AllMessagesReceiver();
+
         return inflater.inflate(R.layout.fragment_most_recent_user, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(allMessagesReceiver,intentFilter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(allMessagesReceiver);
     }
 
     @Override
@@ -131,5 +158,25 @@ public class MostRecentUser extends ListFragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public class AllMessagesReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String data=intent.getStringExtra("data");
+            if(data.equals("saved")){
+                usernames.clear();
+                times.clear();
+                lastMessages.clear();
+                DatabaseHelper databaseHelper=new DatabaseHelper(getContext(),username);
+                List<MostRecentUserWrapper> usersList=databaseHelper.getMostRecent();
+                for(int i=0;i<usersList.size();i++){
+                    usernames.add(usersList.get(i).getUsername());
+                    lastMessages.add(usersList.get(i).getMessage());
+                    times.add(usersList.get(i).getDate());
+                }
+                mostRecentUserAdapter.notifyDataSetChanged();
+            }
+        }
     }
 }

@@ -143,7 +143,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public List<Users> getAllUsersExcept(String username){
         List<Users> usersList=new ArrayList<Users>();
-        String getUsersQuery="select * from "+TABLE_NAME+" where username!=?";
+        String getUsersQuery="select * from "+TABLE_NAME+" where username!=? order by username";
         SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
         Cursor cursor=sqLiteDatabase.rawQuery(getUsersQuery,new String[]{username});
         if(cursor.moveToFirst()){
