@@ -181,7 +181,7 @@ public class Home extends AppCompatActivity {
             // Return a PlaceholderFragment (defined as a static inner class below).
             if(position==1)
                 return new UsersFragment();
-            return PlaceholderFragment.newInstance(position + 1);
+            return new MostRecentUser();
         }
 
         @Override

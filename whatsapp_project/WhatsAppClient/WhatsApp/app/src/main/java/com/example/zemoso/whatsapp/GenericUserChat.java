@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import ClientRes.DatabaseHelper;
 import ClientRes.ServerDetails;
@@ -84,7 +85,6 @@ public class GenericUserChat extends AppCompatActivity {
         userSpecificMessageGetter=new UserSpecificMessageGetter();
         intentFilter=new IntentFilter();
         intentFilter.addAction(MessageGetterService.BroadcastFilter);
-
         /*
         Start service
          */
@@ -115,6 +115,10 @@ public class GenericUserChat extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+
+
+
         registerReceiver(userSpecificMessageGetter,intentFilter);
     }
 
@@ -125,8 +129,21 @@ public class GenericUserChat extends AppCompatActivity {
     }
 
     private void publishData(String data) {
-        updateView(data);
-        new DataSender().execute(token,targetUsername,data);
+
+
+        try {
+            boolean b=new DataSender().execute(token,targetUsername,data).get();
+            if(b){
+
+
+                updateView(data);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void updateView(String data) {
@@ -134,13 +151,17 @@ public class GenericUserChat extends AppCompatActivity {
         time.add(new Date());
         strings.add(data);
         userChatAdapter.notifyDataSetChanged();
+        databaseHelper.addMessage(username, targetUsername, data);
+        databaseHelper.close();
     }
 
     private void loadData() {
         databaseHelper=new DatabaseHelper(this,username);
         List<UserMessages> userMessagesList=databaseHelper.getMessage(username,targetUsername);
         int size=userMessagesList.size();
-        Log.e("size",""+size);
+        strings.clear();
+        time.clear();
+        TAGS.clear();
         for(int i=0;i<size;i++){
             strings.add(userMessagesList.get(i).getMessage());
             String tag=(userMessagesList.get(i).getSender().equals(username)?"self":"no");
@@ -236,4 +257,6 @@ class DataSender extends AsyncTask<String,Void,Boolean> {
         super.onPostExecute(aBoolean);
 
     }
+
+
 }

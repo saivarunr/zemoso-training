@@ -88,8 +88,6 @@ class MessageGetterHttpService extends AsyncTask<String,Void,Boolean>{
 
     @Override
     protected Boolean doInBackground(String... strings) {
-        Log.e("token",token);
-        Log.e("target",targetUsername);
         try{
             String serverAddress=ServerDetails.getServerAddress();
             String newUrl=serverAddress+"/getMessagesOf"+"?target="+strings[0];
@@ -100,6 +98,7 @@ class MessageGetterHttpService extends AsyncTask<String,Void,Boolean>{
             httpURLConnection.addRequestProperty("Content-Type","application/json");
             httpURLConnection.setDoInput(true);
             httpURLConnection.connect();
+
             if(httpURLConnection.getResponseCode()==200){
                 InputStreamReader inputStreamReader=new InputStreamReader(httpURLConnection.getInputStream());
                 JSONParser jsonParser=new JSONParser();
@@ -113,7 +112,7 @@ class MessageGetterHttpService extends AsyncTask<String,Void,Boolean>{
 
         }
         catch (Exception e){
-
+            Log.e("ex",e.toString());
         }
         finally {
             httpURLConnection.disconnect();
@@ -125,7 +124,7 @@ class MessageGetterHttpService extends AsyncTask<String,Void,Boolean>{
     @Override
     protected void onPostExecute(Boolean aBoolean) {
         super.onPostExecute(aBoolean);
-        Log.e("Reached","reached");
+
         if(aBoolean){
             String jsonString=jsonArray.toJSONString();
             intent.putExtra("jsons",jsonString);

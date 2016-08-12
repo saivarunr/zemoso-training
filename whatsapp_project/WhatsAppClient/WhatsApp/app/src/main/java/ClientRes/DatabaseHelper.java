@@ -1,5 +1,6 @@
 package ClientRes;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -8,20 +9,30 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.example.zemoso.whatsapp.MostRecentUser;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zemoso on 4/8/16.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DB_VERSION=1;
+    private String dbOwner=null;
     private static final String DB_NAME="ZEMOSO_WHATSAPP";
     private static final String TABLE_NAME="users";
     private static final String USER_COL="username";
     private static final String SECOND_TABLE="messages";
+    SimpleDateFormat dateFormat=null;
     public DatabaseHelper(Context context,String username) {
         super(context, DB_NAME+"_"+username, null, DB_VERSION);
+        dbOwner=username;
+        dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:SS");
     }
 
     @Override
@@ -83,12 +94,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return false;
         return true;
     }
-    public void addMessage(String source,String target,String message){
+    public void addMessage(String source,String target,String message,String timestamp){
         SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
         ContentValues contentValues=new ContentValues();
         contentValues.put("source",source);
         contentValues.put("target",target);
         contentValues.put("message",message);
+        contentValues.put("timestamp",timestamp);
         try{
             sqLiteDatabase.insert(SECOND_TABLE,null,contentValues);
         }
@@ -97,13 +109,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         sqLiteDatabase.close();
     }
-    public void addMessage(String source,String target,String message,String timestamp){
+
+    public void addMessage(String source,String target,String message){
         SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
         ContentValues contentValues=new ContentValues();
         contentValues.put("source",source);
         contentValues.put("target",target);
         contentValues.put("message",message);
-        contentValues.put("timestamp",timestamp);
+
+        Date d=new Date();
+        contentValues.put("timestamp",dateFormat.format(d));
         try{
             sqLiteDatabase.insert(SECOND_TABLE,null,contentValues);
         }
@@ -140,17 +155,69 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return usersList;
     }
 
-    public List<Users> getMostRecent(){
-        List<Users> usersList=new ArrayList<>();
-        String getMostRecentUsers="select  target from "+SECOND_TABLE+" group by message_id ";
+    public List<MostRecentUserWrapper> getMostRecent(){
+        List<MostRecentUserWrapper> usersList=new ArrayList<>();
         SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
-        Cursor cursor=sqLiteDatabase.rawQuery(getMostRecentUsers,null);
+        String getMostRecentUsersQuery="select source,target,max(message_id) as temp_d from "+SECOND_TABLE+" group by source,target order by temp_d desc";
+        Cursor cursor=sqLiteDatabase.rawQuery(getMostRecentUsersQuery,null);
         if(cursor.moveToFirst()){
             do{
-                Users users=new Users(cursor.getString(0));
-                usersList.add(users);
-            }while(cursor.moveToFirst());
+                String source=cursor.getString(0);
+                String target=cursor.getString(1);
+                int id=cursor.getInt(2);
+                if(isValid(usersList,source,target)){
+
+                    if(dbOwner.equals(source))
+                        usersList.add(new MostRecentUserWrapper(target,id,getMessageById(id),getTimestampById(id)));
+                    else
+                        usersList.add(new MostRecentUserWrapper(source,id,getMessageById(id),getTimestampById(id)));
+                }
+            }while (cursor.moveToNext());
         }
         return usersList;
     }
+
+    public String getMessageById(int id){
+        String message=null;
+        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+        String getMessage="select message from "+SECOND_TABLE+" where message_id="+id;
+
+        try{
+            Cursor cursor=sqLiteDatabase.rawQuery(getMessage,null);
+            cursor.moveToFirst();
+            message=cursor.getString(0);
+
+        }
+        catch (Exception e){
+            Log.e("DBHELPER",e.toString());
+        }
+
+        return message;
+    }
+    public Date getTimestampById(int id){
+        Date message=null;
+        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+        String getMessage="select timestamp from "+SECOND_TABLE+" where message_id="+id;
+
+        try{
+            Cursor cursor=sqLiteDatabase.rawQuery(getMessage,null);
+            cursor.moveToFirst();
+            message=dateFormat.parse(cursor.getString(0));
+
+
+        }
+        catch (Exception e){
+            Log.e("DBH",e.toString());
+        }
+
+        return message;
+    }
+    private boolean isValid(List<MostRecentUserWrapper> usersList, String source, String target) {
+        for(MostRecentUserWrapper users:usersList){
+            if(users.getUsername().equals(source)|users.getUsername().equals(target))
+                return false;
+        }
+    return true;
+    }
+
 }

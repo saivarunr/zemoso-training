@@ -3,6 +3,7 @@ package com.example.zemoso.whatsapp;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -30,6 +31,7 @@ public class UserChatHistory extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_chat_history);
         Button button= (Button) findViewById(R.id.button3);
+
         editText = (EditText) findViewById(R.id.editText);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
