@@ -1,6 +1,8 @@
 package com.example.zemoso.whatsapp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -8,11 +10,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+
+import ClientRes.DatabaseHelper;
+import ClientRes.UserMessages;
 
 /**
  * Created by zemoso on 10/8/16.
@@ -20,20 +27,22 @@ import java.util.Date;
 
 public class UserChatAdapter extends BaseAdapter {
     Context context=null;
-    ArrayList<String> data;
-    LayoutInflater layoutInflater=null;
-    ArrayList<String> TAG;
-    ArrayList<Date> timeArray;
-    public UserChatAdapter(Context context,ArrayList<String> data,ArrayList<String> TAG,ArrayList<Date> time){
-        this.context=context;
-        this.data=data;
 
-        this.TAG=TAG;
-        this.timeArray=time;
+    LayoutInflater layoutInflater=null;
+    ArrayList<Integer> messageIds=null;
+    DatabaseHelper databaseHelper=null;
+    SharedPreferences sharedPreferences=null;
+    String username=null;
+    public UserChatAdapter(Context context,ArrayList<Integer> messageIds){
+        this.context=context;
+        this.messageIds=messageIds;
+        sharedPreferences=context.getSharedPreferences("zemoso_whatsapp",Context.MODE_PRIVATE);
+        username=sharedPreferences.getString("username","");
+        databaseHelper= DatabaseHelper.getInstance(context);
     }
     @Override
     public int getCount() {
-        return data.size();
+        return messageIds.size();
     }
 
     @Override
@@ -52,21 +61,33 @@ public class UserChatAdapter extends BaseAdapter {
             layoutInflater= (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view=layoutInflater.inflate(R.layout.list_view_resource,viewGroup,false);
         }
-
+        UserMessages userMessages=databaseHelper.getWholeMessageById(messageIds.get(i));
         LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.message_container);
         LinearLayout linearLayout1= (LinearLayout) view.findViewById(R.id.message_container_wrapper);
         TextView textView= (TextView) view.findViewById(R.id.message_wrapper);
         TextView time=(TextView)view.findViewById(R.id.message_time_wrapper);
-        textView.setText(data.get(i).toString());
-        time.setText(DateUtils.getRelativeTimeSpanString(timeArray.get(i).getTime(),System.currentTimeMillis(),DateUtils.MINUTE_IN_MILLIS));
-        if(TAG.get(i).equals("self")){
+        ImageView imageView= (ImageView) view.findViewById(R.id.message_read_ticks);
+
+        textView.setText(userMessages.getMessage());
+        try {
+            time.setText(DateUtils.getRelativeTimeSpanString(userMessages.getTimestamp().getTime(),System.currentTimeMillis(),DateUtils.MINUTE_IN_MILLIS));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if(userMessages.getSender().equals(username)){
+            imageView.setVisibility(View.VISIBLE);
             linearLayout.setGravity(Gravity.RIGHT);
             linearLayout1.setBackgroundResource(R.drawable.rounder_textview);
+            if(userMessages.getIsRead()==1)
+            imageView.setImageResource(R.drawable.seendup);
+            else
+                imageView.setImageResource(R.drawable.receiveddup1);
+
         }
         else{
+            imageView.setVisibility(View.INVISIBLE);
             linearLayout.setGravity(Gravity.LEFT);
             linearLayout1.setBackgroundResource(R.drawable.round_text_view_sender);
-
         }
         return view;
     }

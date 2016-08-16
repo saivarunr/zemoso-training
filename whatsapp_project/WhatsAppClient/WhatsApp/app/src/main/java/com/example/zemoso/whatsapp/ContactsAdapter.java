@@ -31,8 +31,8 @@ public class ContactsAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int i) {
-        return i;
+    public Users getItem(int i) {
+        return usernames.get(i);
     }
 
     @Override
@@ -48,16 +48,7 @@ public class ContactsAdapter extends BaseAdapter {
 
         }
         TextView textView= (TextView) view.findViewById(R.id.contacts_username_wrapper);
-        final String temp_username=usernames.get(i).getUsername();
-        textView.setText(temp_username);
-        textView.getRootView().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent=new Intent(context,GenericUserChat.class);
-                intent.putExtra("USERNAME",temp_username);
-                context.startActivity(intent);
-            }
-        });
+        textView.setText(usernames.get(i).getName());
         return view;
     }
 }

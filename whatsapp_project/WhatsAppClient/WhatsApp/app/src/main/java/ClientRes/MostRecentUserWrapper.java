@@ -12,6 +12,7 @@ public class MostRecentUserWrapper {
     private int id;
     private String message;
     private Date date;
+    private String name;
     public MostRecentUserWrapper(String username, int id, String message,Date date){
         this.setUsername(username);
         this.setId(id);
@@ -49,5 +50,13 @@ public class MostRecentUserWrapper {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public void setName(String name) {
+
+        this.name = name;
+    }
+    public String getName(){
+        return name;
     }
 }

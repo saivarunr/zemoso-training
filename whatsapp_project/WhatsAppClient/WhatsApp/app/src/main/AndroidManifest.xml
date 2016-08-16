@@ -41,11 +41,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zemoso.whatsapp.LoginActivity" />
         </activity>
-        <activity android:name=".DatabaseActivity" />
-
-        <service android:name=".MessageGetterService" />
-
-        <activity android:name=".UserChatHistory" />
         <activity
             android:name=".GenericUserChat"
             android:label="@string/title_activity_generic_user_chat"
@@ -55,21 +50,55 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zemoso.whatsapp.Home" />
         </activity>
-        <activity android:name=".FetchContacts"></activity>
-        <receiver android:name=".GenericUserChat$GenericUserDataBroadcastReceiver"
+        <activity android:name=".FetchContacts" />
+
+        <receiver
+            android:name=".GenericUserChat$GenericUserDataBroadcastReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name=".GetAllMessagesService"></action>
+                <action android:name=".GetAllMessagesService" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".MostRecentUser$AllMessagesReceiver" android:enabled="true" android:exported="true">
+        <receiver
+            android:name=".MostRecentUser$AllMessagesReceiver"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
-                <action android:name=".GetAllMessagesService"></action>
+                <action android:name=".GetAllMessagesService" />
             </intent-filter>
-
         </receiver>
-        <service android:name=".GetAllMessagesService" android:enabled="true" android:exported="true"></service>
+        <receiver
+            android:name=".Contacts$NewContactsGetter"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name=".ContactGetterService" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".GetAllMessagesService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".ReadTheseMessages"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".ContactGetterService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name=".CreateGroup"
+            android:label="@string/title_activity_create_group"
+            android:parentActivityName=".Home"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.zemoso.whatsapp.Home" />
+        </activity>
     </application>
 
 </manifest>

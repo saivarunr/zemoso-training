@@ -1,7 +1,5 @@
 package ClientRes;
 
-import org.w3c.dom.Text;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,12 +13,22 @@ public class UserMessages {
     private String reciever;
     private String message;
     private String timestamp;
-    public UserMessages(Integer id,String sender,String reciever,String message,String timestamp){
+    private int isRead;
+    public UserMessages(){
+        this.Id=0;
+        this.sender=null;
+        this.reciever=null;
+        this.timestamp=null;
+        this.message=null;
+        this.setIsRead(0);
+    }
+    public UserMessages(Integer id,String sender,String reciever,String message,String timestamp,Integer isRead){
         this.Id=id;
         this.sender=sender;
         this.reciever=reciever;
         this.message=message;
         this.timestamp=timestamp;
+        this.setIsRead(isRead);
     }
     public String getSender() {
         return sender;
@@ -62,5 +70,13 @@ public class UserMessages {
 
     public void setId(int id) {
         Id = id;
+    }
+
+    public int getIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(int isRead) {
+        this.isRead = isRead;
     }
 }

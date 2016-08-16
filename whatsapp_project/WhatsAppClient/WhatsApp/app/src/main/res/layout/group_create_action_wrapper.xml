@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:visibility="gone"
+android:id="@+id/contact_action_container"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="right"
+    android:text="Create Group"
+    android:id="@+id/create_group"
+
+    android:layout_alignBottom="@+id/clear_group"
+    android:layout_alignParentEnd="true" />
+<Button
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:layout_gravity="left"
+    android:gravity="left"
+    android:background="@drawable/ic_reply_black_24dp"
+
+    android:id="@+id/clear_group"
+
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentStart="true" />
+</RelativeLayout>

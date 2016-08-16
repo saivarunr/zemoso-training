@@ -26,7 +26,7 @@ import java.util.Map;
 import ClientRes.ServerDetails;
 
 public class Register extends AppCompatActivity {
-    EditText username,password,confirmPassword;
+    EditText username,password,confirmPassword,users_name;
     Button button;
     ProgressBar progressBar;
     String getUsername(){
@@ -38,6 +38,7 @@ public class Register extends AppCompatActivity {
     String getConfirmPassword(){
         return confirmPassword.getText().toString();
     }
+    String getUsersName(){return users_name.getText().toString();}
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +48,7 @@ public class Register extends AppCompatActivity {
         username=(EditText)findViewById(R.id.registrationUsername);
         password=(EditText)findViewById(R.id.registrationPassword);
         confirmPassword=(EditText)findViewById(R.id.registrationConfirmPassword);
+        users_name= (EditText) findViewById(R.id.users_name);
         button=(Button)findViewById(R.id.button2);
         progressBar=(ProgressBar)findViewById(R.id.progressBar);
         button.setOnClickListener(new View.OnClickListener() {
@@ -56,11 +58,13 @@ public class Register extends AppCompatActivity {
                 String username=getUsername();
                 String password=getPassword();
                 String confirmPassword=getConfirmPassword();
-                if(validateUserCredentials(username,password,confirmPassword,view)){
+                String users_name_1=getUsersName();
+                if(validateUserCredentials(username,password,confirmPassword,users_name_1,view)){
                         progressBar.setVisibility(View.VISIBLE);
                         Map<String,String> map=new HashMap<String, String>();
                         map.put("username",username);
                         map.put("password",password);
+                        map.put("name",users_name_1);
                         new UserRegistration(view.getContext(),view).execute(map);
                 }
 
@@ -71,7 +75,11 @@ public class Register extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private boolean validateUserCredentials(String username, String password, String confirmPassword,View view) {
+    private boolean validateUserCredentials(String username, String password, String confirmPassword,String name,View view) {
+        if(name.isEmpty()){
+            Toast.makeText(view.getContext(),"Enter your name!",Toast.LENGTH_SHORT).show();
+            return false;
+        }
         if(username.contains(" ")){
             Toast.makeText(view.getContext(),"Username cannot contain spaces",Toast.LENGTH_SHORT).show();
             return false;
@@ -138,13 +146,13 @@ public class Register extends AppCompatActivity {
             super.onPostExecute(status);
             progressBar.setVisibility(View.INVISIBLE);
             if(status==200){
-                Snackbar.make(view,"Yay, you've successfully registered",Snackbar.LENGTH_SHORT).show();
+                Toast.makeText(context,"Yay, you've successfully registered",Toast.LENGTH_SHORT).show();
             }
             else if(status==400){
-                Snackbar.make(view,"Looks like username is already taken!",Snackbar.LENGTH_SHORT).show();
+                Toast.makeText(context,"Looks like username is already taken!",Toast.LENGTH_SHORT).show();
             }
             else{
-                Snackbar.make(view,"The server is going crazy...",Snackbar.LENGTH_SHORT).show();
+                Toast.makeText(context,"The server is going crazy...",Toast.LENGTH_SHORT).show();
             }
         }
     }

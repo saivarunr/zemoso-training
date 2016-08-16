@@ -3,6 +3,7 @@ package ClientRes;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
@@ -23,23 +24,33 @@ import java.util.Map;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DB_VERSION=1;
-    private String dbOwner=null;
+    private static String dbOwner=null;
     private static final String DB_NAME="ZEMOSO_WHATSAPP";
     private static final String TABLE_NAME="users";
     private static final String USER_COL="username";
     private static final String SECOND_TABLE="messages";
     SimpleDateFormat dateFormat=null;
-    public DatabaseHelper(Context context,String username) {
-        super(context, DB_NAME+"_"+username, null, DB_VERSION);
-        dbOwner=username;
+    private static DatabaseHelper databaseHelper=null;
+    static SharedPreferences sharedPreferences=null;
+
+    public DatabaseHelper(Context context) {
+        super(context, DB_NAME+"_"+dbOwner, null, DB_VERSION);
         dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:SS");
     }
 
+    public  static DatabaseHelper getInstance(Context context){
+        if(databaseHelper==null){
+            sharedPreferences=context.getSharedPreferences("zemoso_whatsapp",Context.MODE_PRIVATE);
+            dbOwner=sharedPreferences.getString("username","");
+            databaseHelper=new DatabaseHelper(context);
+        }
+        return databaseHelper;
+    }
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String createTable="create table "+TABLE_NAME+" ("+USER_COL+" varchar(255) primary key);";
+        String createTable="create table "+TABLE_NAME+" ("+USER_COL+" varchar(255) primary key, name varchar(255), is_group INTEGER);";
         String secondaryTable="create table "+SECOND_TABLE+"("
-                +" message_id INTEGER  primary key, source varchar(255), target varchar(255), message TEXT, Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, "+
+                +" message_id INTEGER , source varchar(255), target varchar(255), message TEXT, is_read INTEGER DEFAULT 0, Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, "+
                 "FOREIGN KEY(source) REFERENCES "+TABLE_NAME+"(username), "+
                 " FOREIGN KEY(target) REFERENCES "+TABLE_NAME+"(username) "+
                 ")";
@@ -54,23 +65,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-    public void addUser(String username){
-        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+    public void addUser(String username,String name,Integer is_group){
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getWritableDatabase();
         ContentValues contentValues=new ContentValues();
         contentValues.put(USER_COL,username);
+        contentValues.put("name",name);
+        contentValues.put("is_group",is_group);
         try{
             sqLiteDatabase.insert(TABLE_NAME,null,contentValues);
-        }
-        catch (Exception e){
+        } catch (SQLiteConstraintException e){
+            Log.e("User already present","");
+        } catch (Exception e){
             Log.e("Insert exception",e.toString());
+        }finally {
         }
-        sqLiteDatabase.close();
+
     }
     public void removeUser(String username){
-        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
         String args[]={username};
         sqLiteDatabase.delete(TABLE_NAME,USER_COL+" = ?",args);
-        sqLiteDatabase.close();
+
     }
     public List<Users> getAllUsers(){
         List<Users> usersList=new ArrayList<Users>();
@@ -79,24 +94,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor=sqLiteDatabase.rawQuery(getUsersQuery,null);
         if(cursor.moveToFirst()){
             do{
-                Users users=new Users(cursor.getString(0));
+                Users users=new Users(cursor.getString(0),cursor.getString(1),cursor.getInt(2));
                 usersList.add(users);
             }while (cursor.moveToNext());
         }
+        cursor.close();
+
         return usersList;
     }
     public boolean containsUser(String username){
-        String queryString="select * from "+TABLE_NAME+" where username=?";
-        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
-        Cursor cursor=sqLiteDatabase.rawQuery(queryString,new String[]{username});
-        int count=cursor.getCount();
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
+        int count = 0;
+        Cursor cursor=null;
+        try {
+            String queryString = "select * from " + TABLE_NAME + " where username=?";
+            cursor = sqLiteDatabase.rawQuery(queryString, new String[]{username});
+            count=cursor.getCount();
+        }
+        catch (Exception e){
+            Log.e("containUser",e.toString());
+        }finally {
+            cursor.close();
+
+        }
         if(count==0)
             return false;
         return true;
     }
-    public void addMessage(String source,String target,String message,String timestamp){
-        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+    public void addMessage(Integer id,String source,String target,String message,String timestamp){
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getWritableDatabase();
         ContentValues contentValues=new ContentValues();
+        contentValues.put("message_id",id);
         contentValues.put("source",source);
         contentValues.put("target",target);
         contentValues.put("message",message);
@@ -105,14 +133,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.insert(SECOND_TABLE,null,contentValues);
         }
         catch (Exception e){
+            Log.e("addMessage",e.toString());
+        }
+        finally {
 
         }
-        sqLiteDatabase.close();
+
     }
 
-    public void addMessage(String source,String target,String message){
-        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+    public void addMessage(Integer id,String source,String target,String message){
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
         ContentValues contentValues=new ContentValues();
+        contentValues.put("message_id",id);
         contentValues.put("source",source);
         contentValues.put("target",target);
         contentValues.put("message",message);
@@ -123,41 +155,75 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.insert(SECOND_TABLE,null,contentValues);
         }
         catch (Exception e){
+            Log.e("addMessage",e.toString());
+        }
+        finally {
 
         }
-        sqLiteDatabase.close();
+
     }
     public List<UserMessages> getMessage(String source,String target){
         List<UserMessages> userMessages=new ArrayList<UserMessages>();
         String queryString="select * from "+SECOND_TABLE+" where source=? and target=? or source=? and target=? order by TIMESTAMP";
-        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
         Cursor cursor=sqLiteDatabase.rawQuery(queryString,new String[]{source,target,target,source});
         if(cursor.moveToFirst()){
             do{
-                UserMessages userMessages1=new UserMessages(cursor.getInt(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4));
+                //message_id INTEGER  primary key, source varchar(255), target varchar(255), message TEXT, is_read INTEGER DEFAULT 0, Timestamp
+                UserMessages userMessages1=new UserMessages(cursor.getInt(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(5),cursor.getInt(4));
                 userMessages.add(userMessages1);
             }while (cursor.moveToNext());
         }
+        cursor.close();
+
         return userMessages;
     }
 
     public List<Users> getAllUsersExcept(String username){
         List<Users> usersList=new ArrayList<Users>();
-        String getUsersQuery="select * from "+TABLE_NAME+" where username!=? order by username";
-        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
-        Cursor cursor=sqLiteDatabase.rawQuery(getUsersQuery,new String[]{username});
-        if(cursor.moveToFirst()){
-            do{
-                Users users=new Users(cursor.getString(0));
-                usersList.add(users);
-            }while (cursor.moveToNext());
+        String getUsersQuery="select * from "+TABLE_NAME+" where username!=? and is_group=0 order by username";
+        Cursor cursor=null;
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
+        try {
+            cursor=sqLiteDatabase.rawQuery(getUsersQuery,new String[]{username});
+            if(cursor.moveToFirst()){
+                do{
+                    Users users=new Users(cursor.getString(0),cursor.getString(1),cursor.getInt(2));
+                    usersList.add(users);
+                }while (cursor.moveToNext());
+            }
         }
+        catch (Exception e){
+            Log.e("getAllUserExcep",e.toString());
+        }finally {
+            cursor.close();
+
+        }
+
         return usersList;
     }
+    public String getNameByUsername(String username){
+        String name=null;
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
+        Cursor cursor=sqLiteDatabase.rawQuery("select name from "+TABLE_NAME+" where username=?",new String[]{username});
+        cursor.moveToFirst();
+        name=cursor.getString(0);
+        cursor.close();
+        return name;
+    }
+    public Integer isGroup(String username){
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
+        Cursor cursor=sqLiteDatabase.rawQuery("select is_group from "+TABLE_NAME+" where username=?",new String[]{username});
+        cursor.moveToFirst();
+        int x=cursor.getInt(0);
+        cursor.close();
 
+        return x;
+
+    }
     public List<MostRecentUserWrapper> getMostRecent(){
         List<MostRecentUserWrapper> usersList=new ArrayList<>();
-        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
         String getMostRecentUsersQuery="select source,target,max(message_id) as temp_d from "+SECOND_TABLE+" group by source,target order by temp_d desc";
         Cursor cursor=sqLiteDatabase.rawQuery(getMostRecentUsersQuery,null);
         if(cursor.moveToFirst()){
@@ -173,17 +239,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         usersList.add(new MostRecentUserWrapper(source,id,getMessageById(id),getTimestampById(id)));
                 }
             }while (cursor.moveToNext());
-        }
+        }cursor.close();
+
         return usersList;
     }
 
     public String getMessageById(int id){
         String message=null;
-        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
         String getMessage="select message from "+SECOND_TABLE+" where message_id="+id;
-
+        Cursor cursor=null;
         try{
-            Cursor cursor=sqLiteDatabase.rawQuery(getMessage,null);
+            cursor=sqLiteDatabase.rawQuery(getMessage,null);
             cursor.moveToFirst();
             message=cursor.getString(0);
 
@@ -191,16 +258,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         catch (Exception e){
             Log.e("DBHELPER",e.toString());
         }
+        finally {
+            cursor.close();
+
+        }
 
         return message;
     }
     public Date getTimestampById(int id){
         Date message=null;
-        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
         String getMessage="select timestamp from "+SECOND_TABLE+" where message_id="+id;
-
+        Cursor cursor=null;
         try{
-            Cursor cursor=sqLiteDatabase.rawQuery(getMessage,null);
+            cursor=sqLiteDatabase.rawQuery(getMessage,null);
             cursor.moveToFirst();
             message=dateFormat.parse(cursor.getString(0));
 
@@ -208,6 +279,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         catch (Exception e){
             Log.e("DBH",e.toString());
+        }finally {
+            cursor.close();
+
         }
 
         return message;
@@ -218,6 +292,61 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 return false;
         }
     return true;
+    }
+
+    public void updateMessageasRead(int o) {
+    SQLiteDatabase sqLiteDatabase=databaseHelper.getWritableDatabase();
+        try {
+            String sqlUpdateMesssageRead = "update " + SECOND_TABLE + " set is_read=1 where message_id=" + o;
+            sqLiteDatabase.execSQL(sqlUpdateMesssageRead);
+        }
+        catch (Exception e){
+            Log.e("updateMessage",e.toString());
+        }finally {
+
+        }
+    }
+    public List<Integer> getIdOfMessages(String source,String target){
+        List<Integer> userMessages=new ArrayList<Integer>();
+        String queryString="select message_id  from "+SECOND_TABLE+" where source=? and target=? or source=? and target=? order by TIMESTAMP";
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
+        Cursor cursor=null;
+        try {
+            cursor = sqLiteDatabase.rawQuery(queryString, new String[]{source, target, target, source});
+            if (cursor.moveToFirst()) {
+                do {
+                    //message_id INTEGER  primary key, source varchar(255), target varchar(255), message TEXT, is_read INTEGER DEFAULT 0, Timestamp
+                    userMessages.add(cursor.getInt(0));
+                } while (cursor.moveToNext());
+            }
+
+        }
+        catch (Exception e){
+            Log.e("getIdOfMessages",e.toString());
+        }finally {
+            cursor.close();
+
+        }
+        return userMessages;
+    }
+    public UserMessages getWholeMessageById(int id){
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
+        String s="select * from "+SECOND_TABLE+" where message_id="+id;
+        UserMessages userMessages=null;
+        Cursor cursor=null;
+        try {
+            cursor = sqLiteDatabase.rawQuery(s, null);
+            cursor.moveToFirst();
+             userMessages= new UserMessages(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(5), cursor.getInt(4));
+        }
+        catch (Exception e){
+            Log.e("getWholeMessage",e.toString());
+        }
+        finally {
+            cursor.close();
+
+        }
+        return userMessages;
     }
 
 }

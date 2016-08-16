@@ -23,8 +23,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -40,47 +42,58 @@ import ClientRes.ServerDetails;
 import ClientRes.UserMessages;
 
 public class GenericUserChat extends AppCompatActivity {
-    ArrayList<String> strings=null;
-    ArrayList<String> TAGS=null;
-    ArrayList<Date> time=null;
-    UserChatAdapter userChatAdapter=null;
+    public static class GenericUserDataBroadcastReceiver extends BroadcastReceiver {
+
+        GenericUserChat genericUserChat=new GenericUserChat();
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try{
+                String data=intent.getStringExtra("data");
+                if(data.equals("saved")){
+                    genericUserChat.loadData();
+                }
+            }
+            catch (Exception e){
+                Log.e("ex",e.toString());
+            }
+
+        }
+    }
+    static ArrayList<Integer> messageIds=null;
+    static UserChatAdapter userChatAdapter=null;
     ListView listView=null;
     Button button=null;
     EditText editText=null;
-    String targetUsername=null;
-    String token=null;
-    DatabaseHelper databaseHelper=null;
-    String username=null;
-    UserSpecificMessageGetter userSpecificMessageGetter=null;
+    static String targetUsername=null;
+    static String name=null;
+    static int is_group=0;
+    static String token=null;
+    static DatabaseHelper databaseHelper=null;
+    static String username=null;
     IntentFilter intentFilter=null;
-   public class GenericUserDataBroadcastReceiver extends BroadcastReceiver{
+    Intent readTheseMessages=null;
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String data=intent.getStringExtra("data");
-            if(data.equals("saved")){
-                loadData();
-            }
-        }
-    }
     public GenericUserDataBroadcastReceiver genericUserDataBroadcastReceiver;
+    public static Context context;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_generic_user_chat);
+
+        GenericUserChat.context=getApplicationContext();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
          targetUsername=getIntent().getStringExtra("USERNAME");
-        setTitle(targetUsername);
+        name=getIntent().getStringExtra("NAME");
+        is_group=getIntent().getIntExtra("is_group",-1);
+        Log.e("targetUsername",targetUsername);
+        setTitle(name);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        TAGS=new ArrayList<>();
-        strings=new ArrayList<>();
-        time=new ArrayList<>();
-
+        messageIds=new ArrayList<>();
         listView= (ListView) findViewById(R.id.list_view);
 
-        userChatAdapter=new UserChatAdapter(this,strings,TAGS,time);
+        userChatAdapter=new UserChatAdapter(this,messageIds);
         listView.setAdapter(userChatAdapter);
         listView.setDivider(null);
         listView.setDividerHeight(0);
@@ -89,21 +102,10 @@ public class GenericUserChat extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
         token=sharedPreferences.getString("token","");
         username=sharedPreferences.getString("username","");
-        databaseHelper=new DatabaseHelper(this,username);
+        databaseHelper= DatabaseHelper.getInstance(this);
         genericUserDataBroadcastReceiver=new GenericUserDataBroadcastReceiver();
         intentFilter=new IntentFilter();
         intentFilter.addAction(GetAllMessagesService.BroadcastReceiver);
-        /*userSpecificMessageGetter=new UserSpecificMessageGetter();
-        intentFilter=new IntentFilter();
-        intentFilter.addAction(MessageGetterService.BroadcastFilter);*/
-        /*
-        Start service
-         */
-
-
-        /*Intent intent=new Intent(GenericUserChat.this,MessageGetterService.class);
-        intent.putExtra("target",targetUsername);
-        startService(intent);*/
 
         /*
             Load previous chat history from DB into the adapter
@@ -130,27 +132,35 @@ public class GenericUserChat extends AppCompatActivity {
         super.onResume();
 
         registerReceiver(genericUserDataBroadcastReceiver,intentFilter);
-
-
-        //registerReceiver(userSpecificMessageGetter,intentFilter);
+        readTheseMessages=new Intent(getApplicationContext(),ReadTheseMessages.class);
+        readTheseMessages.putExtra("targetUsername",targetUsername);
+        intent=new Intent(GenericUserChat.this,ReadTheseMessages.class);
+        intent.putExtra("targetUsername",targetUsername);
+        startService(intent);
+    Log.e("genericstarted","1");
     }
-
+     Intent intent=null;
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(genericUserDataBroadcastReceiver);
-        //unregisterReceiver(userSpecificMessageGetter);
+        stopService(intent);
+        Log.e("genericstopped","1");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
     }
 
     private void publishData(String data) {
 
 
         try {
-            boolean b=new DataSender().execute(token,targetUsername,data).get();
-            if(b){
-
-
-                updateView(data);
+            Integer b=new DataSender().execute(token,targetUsername,data).get();
+            if(b>-1){
+                updateView(data,b);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -160,31 +170,19 @@ public class GenericUserChat extends AppCompatActivity {
 
     }
 
-    private void updateView(String data) {
-        TAGS.add("self");
-        time.add(new Date());
-        strings.add(data);
+    private void updateView(String data,Integer id) {
+        messageIds.add(id);
         userChatAdapter.notifyDataSetChanged();
-        databaseHelper.addMessage(username, targetUsername, data);
-        databaseHelper.close();
+        databaseHelper.addMessage(id,username, targetUsername, data);
     }
 
-    private void loadData() {
-        databaseHelper=new DatabaseHelper(this,username);
-        List<UserMessages> userMessagesList=databaseHelper.getMessage(username,targetUsername);
+    static  public void loadData() {
+        databaseHelper= DatabaseHelper.getInstance(context);
+        List<Integer> userMessagesList=databaseHelper.getIdOfMessages(username,targetUsername);
         int size=userMessagesList.size();
-        strings.clear();
-        time.clear();
-        TAGS.clear();
+        messageIds.clear();;
         for(int i=0;i<size;i++){
-            strings.add(userMessagesList.get(i).getMessage());
-            String tag=(userMessagesList.get(i).getSender().equals(username)?"self":"no");
-            TAGS.add(tag);
-            try {
-                time.add(userMessagesList.get(i).getTimestamp());
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            messageIds.add(userMessagesList.get(i));
         }
         userChatAdapter.notifyDataSetChanged();
     }
@@ -195,46 +193,15 @@ public class GenericUserChat extends AppCompatActivity {
         editText.setText("");
         return x;
     }
-
-    class UserSpecificMessageGetter extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String jsons=intent.getStringExtra("jsons");
-            JSONParser jsonParser=new JSONParser();
-
-            try {
-                JSONArray jsonArray= (JSONArray) jsonParser.parse(jsons);
-                int arraySize=jsonArray.size();
-                Log.e("array size",""+arraySize);
-
-                SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:SS");
-                for(int i=0;i<arraySize;i++){
-                    org.json.simple.JSONObject jsonObject= (org.json.simple.JSONObject) jsonArray.get(i);
-                    String message=jsonObject.get("message").toString();
-
-                    time.add(dateFormat.parse(jsonObject.get("timestamp").toString()));
-                    strings.add(message);
-                    TAGS.add("no");
-                    userChatAdapter.notifyDataSetChanged();
-                    databaseHelper.addMessage(targetUsername,username,message,jsonObject.get("timestamp").toString());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-    }
-
 }
 
 
-class DataSender extends AsyncTask<String,Void,Boolean> {
+class DataSender extends AsyncTask<String,Void,Integer> {
     HttpURLConnection httpURLConnection=null;
     int status=0;
     @Override
-    protected Boolean doInBackground(String... strings) {
-        boolean completionFlag=false;
+    protected Integer doInBackground(String... strings) {
+        Integer completionFlag=-1;
         String serverAddress= ServerDetails.getServerAddress();
         try {
             URL url=new URL(serverAddress+"/postMessage");
@@ -251,10 +218,13 @@ class DataSender extends AsyncTask<String,Void,Boolean> {
             OutputStreamWriter outputStreamWriter=new OutputStreamWriter(httpURLConnection.getOutputStream());
             outputStreamWriter.write(jsonObject.toJSONString());
             outputStreamWriter.flush();
+            InputStreamReader inputStreamReader=new InputStreamReader(httpURLConnection.getInputStream());
+            JSONParser jsonParser=new JSONParser();
+            JSONObject jsonObject1= (JSONObject) jsonParser.parse(inputStreamReader);
             status=httpURLConnection.getResponseCode();
             Log.e("json",jsonObject.toJSONString());
             if(status==200){
-                completionFlag=true;
+                completionFlag=Integer.parseInt(jsonObject1.get("message").toString());
             }
         }
         catch (Exception e){
@@ -267,7 +237,7 @@ class DataSender extends AsyncTask<String,Void,Boolean> {
     }
 
     @Override
-    protected void onPostExecute(Boolean aBoolean) {
+    protected void onPostExecute(Integer aBoolean) {
         super.onPostExecute(aBoolean);
 
     }

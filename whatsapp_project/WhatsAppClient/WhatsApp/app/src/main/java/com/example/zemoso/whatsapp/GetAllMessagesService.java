@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.InputStreamReader;
@@ -41,7 +42,7 @@ public class GetAllMessagesService extends Service {
         SharedPreferences sharedPreferences = getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
         username=sharedPreferences.getString("username","");
         token=sharedPreferences.getString("token","");
-        databaseHelper=new DatabaseHelper(getApplicationContext(),username);
+        databaseHelper= DatabaseHelper.getInstance(getApplicationContext());
         super.onCreate();
     }
 
@@ -69,7 +70,7 @@ public class GetAllMessagesService extends Service {
     class MessageGetterHttpService extends AsyncTask<String,Void,Boolean> {
         Boolean completionFlag=false;
         HttpURLConnection httpURLConnection=null;
-        JSONArray jsonArray=null;
+        JSONObject jsonObject=null;
 
 
         @Override
@@ -88,10 +89,8 @@ public class GetAllMessagesService extends Service {
                 if(httpURLConnection.getResponseCode()==200){
                     InputStreamReader inputStreamReader=new InputStreamReader(httpURLConnection.getInputStream());
                     JSONParser jsonParser=new JSONParser();
-                    jsonArray= (JSONArray) jsonParser.parse(inputStreamReader);
-
+                    jsonObject= (JSONObject) jsonParser.parse(inputStreamReader);
                     inputStreamReader.close();
-
                     completionFlag=true;
                 }
 
@@ -114,14 +113,22 @@ public class GetAllMessagesService extends Service {
             intent.setAction(BroadcastReceiver);
             if(aBoolean){
                 try {
+                    JSONArray jsonArray= (JSONArray) jsonObject.get("messages");
                     int arraySize=jsonArray.size();
-                    Log.e("array size",""+arraySize);
+
                     for(int i=0;i<arraySize;i++){
-                        org.json.simple.JSONObject jsonObject= (org.json.simple.JSONObject) jsonArray.get(i);
+                        JSONObject jsonObject= (JSONObject) jsonArray.get(i);
                         String message=jsonObject.get("message").toString();
                         String senderName=jsonObject.get("senderName").toString();
-                        databaseHelper.addMessage(senderName,username,message,jsonObject.get("timestamp").toString());
+                        Integer server_id=Integer.parseInt(jsonObject.get("id").toString());
+                        databaseHelper.addMessage(server_id,senderName,username,message,jsonObject.get("timestamp").toString());
                     }
+                    JSONArray jsonArray1= (JSONArray) jsonObject.get("read");
+                    int arraySize1=jsonArray1.size();
+                    for(int i=0;i<arraySize1;i++){
+                        databaseHelper.updateMessageasRead(Integer.parseInt(jsonArray1.get(i).toString()));
+                    }
+                    //Log.e("array size",""+jsonArray1.toJSONString());
                     intent.putExtra("data","saved");
                 } catch (Exception e) {
                     e.printStackTrace();

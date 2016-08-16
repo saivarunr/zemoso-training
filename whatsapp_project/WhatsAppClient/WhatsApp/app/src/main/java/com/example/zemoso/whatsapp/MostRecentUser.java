@@ -10,12 +10,15 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -48,11 +51,11 @@ public class MostRecentUser extends ListFragment {
 
     private OnFragmentInteractionListener mListener;
     IntentFilter intentFilter;
-    ArrayList<String> usernames=null;
-    ArrayList<String> lastMessages=null;
-    ArrayList<Date> times=null;
-    MostRecentUserAdapter mostRecentUserAdapter=null;
-    String username=null;
+   static ArrayList<String> usernames=null;
+    static ArrayList<String> lastMessages=null;
+    static   ArrayList<Date> times=null;
+    static  MostRecentUserAdapter mostRecentUserAdapter=null;
+    static  String username=null;
     public MostRecentUser() {
         // Required empty public constructor
     }
@@ -98,7 +101,7 @@ public class MostRecentUser extends ListFragment {
 
         SharedPreferences sharedPreferences=getActivity().getSharedPreferences("zemoso_whatsapp",getContext().MODE_PRIVATE);
         username=sharedPreferences.getString("username","");
-        DatabaseHelper databaseHelper=new DatabaseHelper(getContext(),username);
+        DatabaseHelper databaseHelper= DatabaseHelper.getInstance(getContext());
         List<MostRecentUserWrapper> usersList=databaseHelper.getMostRecent();
         usernames.clear();
         lastMessages.clear();
@@ -110,8 +113,6 @@ public class MostRecentUser extends ListFragment {
         }
         mostRecentUserAdapter=new MostRecentUserAdapter(getActivity(),usernames,lastMessages,times);
         setListAdapter(mostRecentUserAdapter);
-        AllMessagesReceiver allMessagesReceiver = new AllMessagesReceiver();
-
         return inflater.inflate(R.layout.fragment_most_recent_user, container, false);
     }
 
@@ -119,7 +120,30 @@ public class MostRecentUser extends ListFragment {
     public void onResume() {
         super.onResume();
         getActivity().registerReceiver(allMessagesReceiver,intentFilter);
+        ListView listView=getListView();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                MostRecentUserAdapter mostRecentUserAdapter = (MostRecentUserAdapter) adapterView.getAdapter();
+                String username = mostRecentUserAdapter.getItem(i);
+
+
+                    Intent intent = new Intent(getContext(), GenericUserChat.class);
+                    intent.putExtra("USERNAME", username);
+                    DatabaseHelper databaseHelper=new DatabaseHelper(getContext());
+                    String name=databaseHelper.getNameByUsername(username);
+                    intent.putExtra("NAME",name);
+                    int is_group=databaseHelper.isGroup(username);
+                    intent.putExtra("is_group",is_group);
+                    getContext().startActivity(intent);
+
+
+            }
+        });
+
     }
+
+
 
     @Override
     public void onPause() {
@@ -145,22 +169,14 @@ public class MostRecentUser extends ListFragment {
         super.onListItemClick(l, v, position, id);
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+
+
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 
-    public class AllMessagesReceiver extends BroadcastReceiver {
+   public static class AllMessagesReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             String data=intent.getStringExtra("data");
@@ -168,7 +184,7 @@ public class MostRecentUser extends ListFragment {
                 usernames.clear();
                 times.clear();
                 lastMessages.clear();
-                DatabaseHelper databaseHelper=new DatabaseHelper(getContext(),username);
+                DatabaseHelper databaseHelper=DatabaseHelper.getInstance(context);
                 List<MostRecentUserWrapper> usersList=databaseHelper.getMostRecent();
                 for(int i=0;i<usersList.size();i++){
                     usernames.add(usersList.get(i).getUsername());

@@ -6,7 +6,6 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/colorAccent"
         android:padding="5dp"
         android:layout_marginBottom="3dp"
         android:orientation="vertical"
@@ -16,15 +15,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/message_wrapper"
-            android:minWidth="100dp"
+            android:minWidth="120dp"
             android:maxWidth="180dp"
             android:textSize="18dp"
             />
-        <TextView
-            android:layout_width="match_parent"
+        <RelativeLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/message_time_wrapper"
-            android:text="time" android:gravity="right"/>
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/message_time_wrapper"
+                android:text="time" android:gravity="left"
+
+                />
+            <ImageView
+
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:id="@+id/message_read_ticks"
+                android:layout_alignRight="@id/message_time_wrapper"
+                 />
+        </RelativeLayout>
+
     </LinearLayout>
 
 </LinearLayout>

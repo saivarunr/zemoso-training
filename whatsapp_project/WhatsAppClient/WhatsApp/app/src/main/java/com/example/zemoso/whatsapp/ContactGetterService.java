@@ -1,17 +1,14 @@
 package com.example.zemoso.whatsapp;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -24,27 +21,55 @@ import java.net.URL;
 import ClientRes.DatabaseHelper;
 import ClientRes.ServerDetails;
 
-public class FetchContacts extends AppCompatActivity {
-    TextView textView;
-    ProgressBar progressBar;
+/**
+ * Created by zemoso on 15/8/16.
+ */
+public class ContactGetterService extends Service {
+    String username;
+    String token;
+    final public static String ContactGetterSerivceString="ContactGetterSerivceString";
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fetch_contacts);
-        SharedPreferences sharedPreferences=getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
-        String username=sharedPreferences.getString("username","");
-        String token=sharedPreferences.getString("token","");
-         progressBar= (ProgressBar) findViewById(R.id.progressBar2);
-         textView= (TextView) findViewById(R.id.textView2);
-        new UsernameGetter(this,username).execute(token);
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        SharedPreferences sharedPreferences=getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
+        username=sharedPreferences.getString("username","");
+        token=sharedPreferences.getString("token","");
+        ThisClassThread thisClassThread=new ThisClassThread();
+        thisClassThread.start();
+        return super.onStartCommand(intent, flags, startId);
+    }
+    class ThisClassThread extends Thread{
+        @Override
+        public void run() {
+            super.run();
+            while (true){
+                try {
+                    new UsernameGetter(getApplicationContext(),username).execute(token);
+                    Thread.sleep(4000);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
     }
     class UsernameGetter extends AsyncTask<String,Void,Boolean> {
         Context context;
         DatabaseHelper databaseHelper=null;
         org.json.simple.JSONArray jsonArray=null;
         UsernameGetter(Context context, String username){
-            databaseHelper= DatabaseHelper.getInstance(context);
+            databaseHelper=DatabaseHelper.getInstance(context);
             this.context=context;
         }
 
@@ -99,12 +124,12 @@ public class FetchContacts extends AppCompatActivity {
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
-            textView.setVisibility(View.INVISIBLE);
-            progressBar.setVisibility(View.INVISIBLE);
-            Intent intent=new Intent(FetchContacts.this,Home.class);
-            context.startActivity(intent);
-            finish();
+            if(aBoolean){
+                Intent intent=new Intent();
+                intent.setAction(ContactGetterSerivceString);
+                sendBroadcast(intent);
+            }
+
         }
     }
 }
-
