@@ -96,7 +96,6 @@ public class Contacts extends ListFragment {
             @Override
             public void onClick(View view) {
                 ArrayList<String> stringList= (ArrayList<String>) getStringList();
-                Toast.makeText(getContext(),stringList.toString(),Toast.LENGTH_LONG).show();
                 Intent intent=new Intent(getContext(),CreateGroup.class);
                 intent.putStringArrayListExtra("stringList",stringList);
                 getContext().startActivity(intent);
