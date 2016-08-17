@@ -1,21 +1,26 @@
 package controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.text.json.EJson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import models.GroupMessageValid;
+import models.Group_User;
 import models.Groups;
 import models.Messages;
 import models.Users;
 import play.libs.Json;
 import play.mvc.*;
+import scala.util.parsing.json.JSONArray;
 
 import views.html.*;
 
@@ -76,9 +81,11 @@ public class HomeController extends Controller {
     			String groupUsername=UUID.randomUUID().toString();
     			users1=new Users(groupUsername,groupUsername,groupUsername,groupName,1);
     			Ebean.save(users1);
+    			Groups groups=new Groups(users1,sender);
+    			Ebean.save(groups);
     			for(int i=0;i<json.size();i++){
     				Users users2=Ebean.find(Users.class).where().eq("username", json.get(""+i).asText()).findUnique();
-    				Groups groups=new Groups(users1, users2);
+    				groups=new Groups(users1, users2);
     				Ebean.save(groups);
     			}
     		}
@@ -91,7 +98,22 @@ public class HomeController extends Controller {
     	
     	return ok();
     }
-    
+    public Result addUsersToGroup(){
+    	JsonNode jsonNode=request().body().asJson();
+    	String data=jsonNode.path("data").asText();
+    	JsonNode json=jsonNode.path("users");
+    	Map<String, Object> map=null;
+    	try {
+    		map=EJson.parseObject(json.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	Group_User group_User=new Group_User(map,data);
+    	Ebean.save(group_User);
+    	return ok();
+    }
+   
     public Result login(){
     	ObjectNode node=Json.newObject();
     	JsonNode jsonNode=request().body().asJson();
@@ -125,8 +147,7 @@ public class HomeController extends Controller {
     									.eq("username", users)
     								.findList();
     		
-    		List<Users> l=Ebean.find(Users.class).where().eq("isGroup", 0).findList();
-    		
+    		List<Users> l=Ebean.find(Users.class).where().findList();
     		List<Users> list=new ArrayList<Users>();
     		
     		for(int i=0;i<groups.size();i++){
@@ -189,7 +210,7 @@ public class HomeController extends Controller {
     		for(Messages messages:list){
     			Messages messages2=Ebean.find(Messages.class).where().eq("id",messages.getId()).findUnique();
     			messages2.setRequested(1);
-    			Ebean.save(messages2);
+    			Ebean.update(messages2);
     		}
     		return ok(Json.toJson(list));
     	}
@@ -212,8 +233,8 @@ public class HomeController extends Controller {
     		.findList();
     		for(Messages messages:list){
     			Messages messages2=Ebean.find(Messages.class).where().eq("id",messages.getId()).findUnique();
-    			messages2.setRead(1);
-    			Ebean.save(messages2);
+    			messages2.setRequested(2);
+    			Ebean.update(messages2);
     		}
     		return ok();
     	}
@@ -224,13 +245,50 @@ public class HomeController extends Controller {
     	}
     }
     
+    @SuppressWarnings("null")
+	public Result getGroupMessages(){
+    	String token=request().getHeader("Authorization");
+    	List<Groups> groups=null;
+    	List<Messages> messages=new ArrayList<Messages>();
+    	try{
+    		Users users=Ebean.find(Users.class).where().eq("token", token).findUnique();
+    		groups=Ebean.find(Groups.class).where().eq("username", users).findList();
+    		List<GroupMessageValid> groupMessageValids=Ebean.find(GroupMessageValid.class)
+    														.where().eq("users", users).findList();
+    		List<Integer> integers=new ArrayList<Integer>();
+    		for(GroupMessageValid groupMessageValid:groupMessageValids)
+    			integers.add(Integer.parseInt(String.valueOf(groupMessageValid.getMessages().getId())));
+    		for(Groups g:groups){
+    			List<Messages> m=Ebean
+    								.find(Messages.class)
+    									.where()
+    										.conjunction()
+    											.eq("reciever",g.getGroupName())
+    											.notIn("id",integers)
+    										.endJunction()
+    									.findList();
+    			messages.addAll(m);
+    		}
+    		for(Messages m:messages){
+    			GroupMessageValid messageValid=new GroupMessageValid(m,users);
+    			Ebean.save(messageValid);
+    		}
+    	}
+    	catch(Exception e){
+    		return badRequest(e.toString());
+    	}
+    	return ok(Json.toJson(messages));
+    }
+    
     @SuppressWarnings("deprecation")
 	public Result getAllMessages(){
     	String token=request().getHeader("Authorization");
+    	Users users=null;
     	try{
+    		users=Ebean.find(Users.class).where().eq("token", token).findUnique();
     		List<Messages> list=Ebean.find(Messages.class).where()
 	    			.conjunction()
-	    				.eq("reciever",Ebean.find(Users.class).where().eq("token", token).findUnique())
+	    				.eq("reciever",users)
 	    				.eq("requested",0)
 	    			.endJunction()
 	    		.orderBy("timestamp")
@@ -238,14 +296,49 @@ public class HomeController extends Controller {
     		for(Messages messages:list){
     			Messages messages2=Ebean.find(Messages.class).where().eq("id",messages.getId()).findUnique();
     			messages2.setRequested(1);
-    			Ebean.save(messages2);
+    			Ebean.update(messages2);
     		}
     		ObjectNode node=Json.newObject();
     		node.put("messages",Json.toJson(list));
-    		List<Object> list2=Ebean.find(Messages.class).where()
-    			.conjunction().eq("sender",Ebean.find(Users.class).where().eq("token", token).findUnique())
-    			.eq("read", 1).endJunction().findIds();
-    		node.put("read",Json.toJson(list2));
+    		
+    		List<Messages> list2=Ebean.find(Messages.class).where()
+    			.conjunction().eq("sender",users)
+    			.ge("requested", 1).endJunction().findList();
+    		ArrayNode arrayNode=Json.newArray();
+    		for(Messages l1:list2){
+    			ObjectNode node2=Json.newObject();
+    			node2.put("id", l1.getId());
+    			node2.put("requested",l1.getRequested());
+    			arrayNode.add(node2);
+    		}
+    		node.put("requested",Json.toJson(arrayNode));
+    		
+    		
+    		
+    		List<Messages> list3=new ArrayList<Messages>();
+    		
+    		List<GroupMessageValid> groupMessageValids=Ebean.find(GroupMessageValid.class)
+    														.where().eq("users", users).findList();
+			List<Integer> integers=new ArrayList<Integer>();
+			for(GroupMessageValid groupMessageValid:groupMessageValids)
+				integers.add(Integer.parseInt(String.valueOf(groupMessageValid.getMessages().getId())));
+			List<Groups> groups=Ebean.find(Groups.class).where().eq("username", users).findList();
+			for(Groups g:groups){
+    			List<Messages> m=Ebean
+    								.find(Messages.class)
+    									.where()
+    										.conjunction()
+    											.eq("reciever",g.getGroupName())
+    											.notIn("id",integers)
+    										.endJunction()
+    									.findList();
+    			list3.addAll(m);
+    		}
+    		for(Messages m:list3){
+    			GroupMessageValid messageValid=new GroupMessageValid(m,users);
+    			Ebean.save(messageValid);
+    		}
+    		node.put("groupMessage", Json.toJson(list3));
     		return ok(node);
     	}
     	catch(Exception e){
@@ -253,5 +346,10 @@ public class HomeController extends Controller {
     		node.put("message", "failed");
     		return badRequest(node);
     	}
+    }
+    public Result findUsers(){
+    	String targetName=request().getQueryString("username");
+    	List<Group_User> group_Users=Ebean.find(Group_User.class).where().jsonExists("map", targetName).findList();
+    	return ok(group_Users.size()+"");
     }
 }

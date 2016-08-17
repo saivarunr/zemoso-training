@@ -19,3 +19,6 @@ GET		/getMessagesOf				controllers.HomeController.getMessagesOf
 GET		/getAllMessages				controllers.HomeController.getAllMessages
 GET		/readMessages				controllers.HomeController.readMessages
 POST	/addMembersToGroup			controllers.HomeController.addMembersToGroup
+POST	/addUsersToGroup			controllers.HomeController.addUsersToGroup
+GET		/findUsers					controllers.HomeController.findUsers
+GET		/getGroupMessages			controllers.HomeController.getGroupMessages

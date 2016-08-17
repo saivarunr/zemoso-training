@@ -119,6 +119,8 @@ public class CreateGroup extends AppCompatActivity {
             super.onPostExecute(aBoolean);
             if(aBoolean){
                 Toast.makeText(getApplicationContext(),"Group Created",Toast.LENGTH_LONG).show();
+                Intent intent=new Intent(CreateGroup.this,Home.class);
+                getApplicationContext().startActivity(intent);
             }
         }
     }

@@ -3,6 +3,7 @@ package com.example.zemoso.whatsapp;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +37,7 @@ public class FetchContacts extends AppCompatActivity {
         String token=sharedPreferences.getString("token","");
          progressBar= (ProgressBar) findViewById(R.id.progressBar2);
          textView= (TextView) findViewById(R.id.textView2);
+        DatabaseHelper databaseHelper=DatabaseHelper.getInstance(getApplicationContext());
         new UsernameGetter(this,username).execute(token);
 
     }

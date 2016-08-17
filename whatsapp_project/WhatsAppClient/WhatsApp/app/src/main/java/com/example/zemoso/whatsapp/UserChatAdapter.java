@@ -78,11 +78,12 @@ public class UserChatAdapter extends BaseAdapter {
             imageView.setVisibility(View.VISIBLE);
             linearLayout.setGravity(Gravity.RIGHT);
             linearLayout1.setBackgroundResource(R.drawable.rounder_textview);
-            if(userMessages.getIsRead()==1)
+            if(userMessages.getIsRead()==2)
             imageView.setImageResource(R.drawable.seendup);
-            else
+            else if(userMessages.getIsRead()==1)
                 imageView.setImageResource(R.drawable.receiveddup1);
-
+            else
+                imageView.setImageResource(R.drawable.received);
         }
         else{
             imageView.setVisibility(View.INVISIBLE);

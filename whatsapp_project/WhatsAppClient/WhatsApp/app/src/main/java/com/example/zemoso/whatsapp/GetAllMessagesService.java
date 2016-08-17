@@ -123,12 +123,25 @@ public class GetAllMessagesService extends Service {
                         Integer server_id=Integer.parseInt(jsonObject.get("id").toString());
                         databaseHelper.addMessage(server_id,senderName,username,message,jsonObject.get("timestamp").toString());
                     }
-                    JSONArray jsonArray1= (JSONArray) jsonObject.get("read");
+                    JSONArray jsonArray1= (JSONArray) jsonObject.get("requested");
                     int arraySize1=jsonArray1.size();
                     for(int i=0;i<arraySize1;i++){
-                        databaseHelper.updateMessageasRead(Integer.parseInt(jsonArray1.get(i).toString()));
+                        JSONObject jsonObject= (JSONObject) jsonArray1.get(i);
+                        int id=Integer.parseInt(jsonObject.get("id").toString());
+                        int requested=Integer.parseInt(jsonObject.get("requested").toString());
+                        databaseHelper.updateMessageasRead(id,requested);
                     }
-                    //Log.e("array size",""+jsonArray1.toJSONString());
+                    JSONArray jsonArray2= (JSONArray) jsonObject.get("groupMessage");
+                    int arraySize2=jsonArray2.size();
+                    for(int i=0;i<arraySize2;i++){
+                        JSONObject jsonObject= (JSONObject) jsonArray2.get(i);
+                        int id=Integer.parseInt(jsonObject.get("id").toString());
+                        String message=jsonObject.get("message").toString();
+                        String timestamp=jsonObject.get("timestamp").toString();
+                        String senderName=jsonObject.get("senderName").toString();
+                        String recieverName=jsonObject.get("recieverName").toString();
+                        databaseHelper.addMessage(id,senderName,recieverName,message,timestamp);
+                    }
                     intent.putExtra("data","saved");
                 } catch (Exception e) {
                     e.printStackTrace();

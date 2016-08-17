@@ -30,14 +30,12 @@ public class Messages extends Model{
 	
 	@Column(name="requested",columnDefinition="integer default 0")
 	private Integer requested;
-	@Column(name="is_read")
-	private Integer read;
 	public Messages(Users sender,Users reciever,String message){
 		setSender(sender);
 		setReciever(reciever);
 		setMessage(message);
 		setRequested(0);
-		setRead(0);
+		
 	}
 	 Users getSender() {
 		return sender;
@@ -78,10 +76,5 @@ public class Messages extends Model{
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Integer getRead() {
-		return read;
-	}
-	public void setRead(Integer read) {
-		this.read = read;
-	}
+	
 }

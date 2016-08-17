@@ -103,6 +103,9 @@ public class MostRecentUser extends ListFragment {
         username=sharedPreferences.getString("username","");
         DatabaseHelper databaseHelper= DatabaseHelper.getInstance(getContext());
         List<MostRecentUserWrapper> usersList=databaseHelper.getMostRecent();
+        if(usersList.size()==0){
+            
+        }
         usernames.clear();
         lastMessages.clear();
         times.clear();

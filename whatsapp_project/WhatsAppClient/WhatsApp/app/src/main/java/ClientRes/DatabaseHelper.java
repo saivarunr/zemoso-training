@@ -50,7 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String createTable="create table "+TABLE_NAME+" ("+USER_COL+" varchar(255) primary key, name varchar(255), is_group INTEGER);";
         String secondaryTable="create table "+SECOND_TABLE+"("
-                +" message_id INTEGER , source varchar(255), target varchar(255), message TEXT, is_read INTEGER DEFAULT 0, Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, "+
+                +" message_id INTEGER PRIMARY KEY, source varchar(255), target varchar(255), message TEXT, is_read INTEGER DEFAULT 0, Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, "+
                 "FOREIGN KEY(source) REFERENCES "+TABLE_NAME+"(username), "+
                 " FOREIGN KEY(target) REFERENCES "+TABLE_NAME+"(username) "+
                 ")";
@@ -132,9 +132,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try{
             sqLiteDatabase.insert(SECOND_TABLE,null,contentValues);
         }
+        catch (SQLiteConstraintException e){
+            Log.w("Duplicate entry","");
+        }
         catch (Exception e){
             Log.e("addMessage",e.toString());
         }
+
         finally {
 
         }
@@ -153,6 +157,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put("timestamp",dateFormat.format(d));
         try{
             sqLiteDatabase.insert(SECOND_TABLE,null,contentValues);
+        }
+        catch (SQLiteConstraintException e){
+            Log.w("Duplicate entry","");
+
         }
         catch (Exception e){
             Log.e("addMessage",e.toString());
@@ -181,7 +189,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public List<Users> getAllUsersExcept(String username){
         List<Users> usersList=new ArrayList<Users>();
-        String getUsersQuery="select * from "+TABLE_NAME+" where username!=? and is_group=0 order by username";
+        String getUsersQuery="select * from "+TABLE_NAME+" where username!=?  order by username";
         Cursor cursor=null;
         SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
         try {
@@ -294,10 +302,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     return true;
     }
 
-    public void updateMessageasRead(int o) {
+    public void updateMessageasRead(int o,int requested) {
     SQLiteDatabase sqLiteDatabase=databaseHelper.getWritableDatabase();
         try {
-            String sqlUpdateMesssageRead = "update " + SECOND_TABLE + " set is_read=1 where message_id=" + o;
+            String sqlUpdateMesssageRead = "update " + SECOND_TABLE + " set is_read="+requested+" where message_id=" + o;
             sqLiteDatabase.execSQL(sqlUpdateMesssageRead);
         }
         catch (Exception e){
