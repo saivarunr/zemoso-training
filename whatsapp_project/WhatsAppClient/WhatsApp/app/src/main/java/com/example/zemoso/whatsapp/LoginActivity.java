@@ -54,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences=getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
         String userToken=sharedPreferences.getString("token",null);
         if(userToken!=null){
-            this.startActivity(new Intent(LoginActivity.this,FetchContacts.class));
+            this.startActivity(new Intent(LoginActivity.this,Home.class));
             finish();
         }
         setContentView(R.layout.activity_login);
@@ -156,7 +156,7 @@ public class LoginActivity extends AppCompatActivity {
             super.onPostExecute(status);
             if(status==200) {
 
-                Intent intent=new Intent(LoginActivity.this,FetchContacts.class);
+                Intent intent=new Intent(LoginActivity.this,Home.class);
                 context.startActivity(intent);
                 finish();
             }

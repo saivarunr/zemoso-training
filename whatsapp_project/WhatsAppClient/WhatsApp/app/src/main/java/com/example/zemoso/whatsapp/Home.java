@@ -89,8 +89,9 @@ public class Home extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-        Intent intent2=new Intent(Home.this,ContactGetterService.class);
-        this.startService(intent2);
+        //Intent intent2=new Intent(Home.this,ContactGetterService.class);
+        //this.startService(intent2);
+
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

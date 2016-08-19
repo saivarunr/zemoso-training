@@ -56,7 +56,7 @@ boolean flag=true;
             while (flag){try {
                 new MessageReadStateUpadter().execute(target);
                 Thread.sleep(4000);
-                Log.e("RTM","inLoop");
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }}
@@ -102,7 +102,7 @@ boolean flag=true;
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
-            Log.e("RTMSGS",""+aBoolean);
+
 
         }
     }

@@ -1,6 +1,7 @@
 package com.example.zemoso.whatsapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.text.format.DateUtils;
@@ -33,12 +34,15 @@ public class UserChatAdapter extends BaseAdapter {
     DatabaseHelper databaseHelper=null;
     SharedPreferences sharedPreferences=null;
     String username=null;
-    public UserChatAdapter(Context context,ArrayList<Integer> messageIds){
+    Integer isUserGroup=0;
+    public UserChatAdapter(Context context,ArrayList<Integer> messageIds,Integer isUserGroup){
         this.context=context;
         this.messageIds=messageIds;
+        this.isUserGroup=isUserGroup;
         sharedPreferences=context.getSharedPreferences("zemoso_whatsapp",Context.MODE_PRIVATE);
         username=sharedPreferences.getString("username","");
         databaseHelper= DatabaseHelper.getInstance(context);
+
     }
     @Override
     public int getCount() {
@@ -79,11 +83,11 @@ public class UserChatAdapter extends BaseAdapter {
             linearLayout.setGravity(Gravity.RIGHT);
             linearLayout1.setBackgroundResource(R.drawable.rounder_textview);
             if(userMessages.getIsRead()==2)
-            imageView.setImageResource(R.drawable.seendup);
+            imageView.setImageResource(R.drawable.message_seen_resource);
             else if(userMessages.getIsRead()==1)
-                imageView.setImageResource(R.drawable.receiveddup1);
+                imageView.setImageResource(R.drawable.message_received_resource);
             else
-                imageView.setImageResource(R.drawable.received);
+                imageView.setImageResource(R.drawable.ic_done_black_24dp);
         }
         else{
             imageView.setVisibility(View.INVISIBLE);

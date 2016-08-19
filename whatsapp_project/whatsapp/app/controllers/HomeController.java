@@ -1,5 +1,6 @@
 package controllers;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +21,8 @@ import models.Messages;
 import models.Users;
 import play.libs.Json;
 import play.mvc.*;
+import play.mvc.BodyParser.MultipartFormData;
+import play.mvc.Http.MultipartFormData.FilePart;
 import scala.util.parsing.json.JSONArray;
 
 import views.html.*;
@@ -37,8 +40,7 @@ public class HomeController extends Controller {
      * <code>GET</code> request with a path of <code>/</code>.
      */
     public Result index() {
- 
-        return ok(index.render("Your new application is ready."));
+    	return ok(index.render("Your new application is ready."));
     }
     public Result newUser(){
     	ObjectNode node=Json.newObject();
@@ -147,7 +149,7 @@ public class HomeController extends Controller {
     									.eq("username", users)
     								.findList();
     		
-    		List<Users> l=Ebean.find(Users.class).where().findList();
+    		List<Users> l=Ebean.find(Users.class).where().eq("isGroup",0).findList();
     		List<Users> list=new ArrayList<Users>();
     		
     		for(int i=0;i<groups.size();i++){
@@ -163,7 +165,11 @@ public class HomeController extends Controller {
     		return badRequest(node1);
     	}
     }
-    
+    public Result uploadImage(){
+    	JsonNode jsonNode=request().body().asJson();
+    	String x=jsonNode.path("image").asText();
+    	return ok(x);
+    }
     public Result postMessage(){
     	String token=request().getHeader("Authorization");
     	ObjectNode node=Json.newObject();
@@ -286,7 +292,22 @@ public class HomeController extends Controller {
     	Users users=null;
     	try{
     		users=Ebean.find(Users.class).where().eq("token", token).findUnique();
-    		List<Messages> list=Ebean.find(Messages.class).where()
+    		List<Groups> groups=Ebean.find(Groups.class)
+					.where()
+						.eq("username", users)
+					.findList();
+
+			List<Users> l=Ebean.find(Users.class).where().eq("isGroup",0).findList();
+			List<Users> listUsers=new ArrayList<Users>();
+			
+			for(Groups g:groups){
+				Users users2=Ebean.find(Users.class).where().eq("username", g.getGroupName().getUsername()).findUnique();
+				listUsers.add(users2);
+			}
+			l.addAll(listUsers);
+			ObjectNode node=Json.newObject();
+			node.put("contacts", Json.toJson(l));
+			List<Messages> list=Ebean.find(Messages.class).where()
 	    			.conjunction()
 	    				.eq("reciever",users)
 	    				.eq("requested",0)
@@ -298,7 +319,7 @@ public class HomeController extends Controller {
     			messages2.setRequested(1);
     			Ebean.update(messages2);
     		}
-    		ObjectNode node=Json.newObject();
+    		
     		node.put("messages",Json.toJson(list));
     		
     		List<Messages> list2=Ebean.find(Messages.class).where()
@@ -322,7 +343,6 @@ public class HomeController extends Controller {
 			List<Integer> integers=new ArrayList<Integer>();
 			for(GroupMessageValid groupMessageValid:groupMessageValids)
 				integers.add(Integer.parseInt(String.valueOf(groupMessageValid.getMessages().getId())));
-			List<Groups> groups=Ebean.find(Groups.class).where().eq("username", users).findList();
 			for(Groups g:groups){
     			List<Messages> m=Ebean
     								.find(Messages.class)

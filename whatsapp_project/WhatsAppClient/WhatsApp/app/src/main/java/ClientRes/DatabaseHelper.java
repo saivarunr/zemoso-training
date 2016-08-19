@@ -99,7 +99,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }while (cursor.moveToNext());
         }
         cursor.close();
-
         return usersList;
     }
     public boolean containsUser(String username){
@@ -189,7 +188,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public List<Users> getAllUsersExcept(String username){
         List<Users> usersList=new ArrayList<Users>();
-        String getUsersQuery="select * from "+TABLE_NAME+" where username!=?  order by username";
+        String getUsersQuery="select * from "+TABLE_NAME+" where username!=? and is_group=0 order by username";
         Cursor cursor=null;
         SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
         try {
@@ -225,7 +224,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.moveToFirst();
         int x=cursor.getInt(0);
         cursor.close();
-
         return x;
 
     }
@@ -240,11 +238,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String target=cursor.getString(1);
                 int id=cursor.getInt(2);
                 if(isValid(usersList,source,target)){
+                    if(databaseHelper.isGroup(source)==1){
+                        usersList.add(new MostRecentUserWrapper(source,id,target+": "+getMessageById(id),getTimestampById(id)));
+                    }
+                    if(databaseHelper.isGroup(target)==1){
+                        usersList.add(new MostRecentUserWrapper(target,id,source+": "+getMessageById(id),getTimestampById(id)));
+                    }else{
+                        if(dbOwner.equals(source))
+                            usersList.add(new MostRecentUserWrapper(target,id,getMessageById(id),getTimestampById(id)));
+                        else
+                            usersList.add(new MostRecentUserWrapper(source,id,getMessageById(id),getTimestampById(id)));
+                    }
 
-                    if(dbOwner.equals(source))
-                        usersList.add(new MostRecentUserWrapper(target,id,getMessageById(id),getTimestampById(id)));
-                    else
-                        usersList.add(new MostRecentUserWrapper(source,id,getMessageById(id),getTimestampById(id)));
                 }
             }while (cursor.moveToNext());
         }cursor.close();
@@ -356,5 +361,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return userMessages;
     }
+    public List<Integer> getIdOfMessagesOfGroup(String groupname){
+        List<Integer> integers=new ArrayList<>();
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
+        String getIdOfMessagesOfGroupQuery="select message_id from "+SECOND_TABLE+" where target=?";
+        Cursor cursor=null;
+        try{
+            cursor=sqLiteDatabase.rawQuery(getIdOfMessagesOfGroupQuery,new String[]{groupname});
+            if(cursor.moveToFirst()){
+                do{
+                    integers.add(cursor.getInt(0));
+                }while (cursor.moveToNext());
+            }
+        }
+        catch (Exception e){
 
+        }
+        finally {
+            cursor.close();
+        }
+        return integers;
+    }
 }

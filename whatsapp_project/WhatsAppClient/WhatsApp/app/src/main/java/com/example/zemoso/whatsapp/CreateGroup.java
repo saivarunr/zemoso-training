@@ -120,6 +120,7 @@ public class CreateGroup extends AppCompatActivity {
             if(aBoolean){
                 Toast.makeText(getApplicationContext(),"Group Created",Toast.LENGTH_LONG).show();
                 Intent intent=new Intent(CreateGroup.this,Home.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getApplicationContext().startActivity(intent);
             }
         }

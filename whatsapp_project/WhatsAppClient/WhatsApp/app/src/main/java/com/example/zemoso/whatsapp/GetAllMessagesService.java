@@ -16,9 +16,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import ClientRes.DatabaseHelper;
 import ClientRes.ServerDetails;
+import ClientRes.Users;
 
 /**
  * Created by zemoso on 12/8/16.
@@ -113,15 +115,35 @@ public class GetAllMessagesService extends Service {
             intent.setAction(BroadcastReceiver);
             if(aBoolean){
                 try {
+                    JSONArray jsonArrayC=(JSONArray) jsonObject.get("contacts");
+                    int contactsSize=jsonArrayC.size();
+                    List<Users> dbUsers=databaseHelper.getAllUsers();
+                    intent.putExtra("contacts","no");
+                    int dbUserSize=dbUsers.size();
+
+                    if(dbUserSize<contactsSize){
+                        for(int i=0;i<contactsSize;i++){
+                            JSONObject jsonObject= (JSONObject) jsonArrayC.get(i);
+                            String username=jsonObject.get("username").toString();
+                            String name=jsonObject.get("name").toString();
+                            Integer isGroup=Integer.parseInt(jsonObject.get("isGroup").toString());
+                            Log.e("contains",""+databaseHelper.containsUser(username));
+                            if(!databaseHelper.containsUser(username)){
+                                databaseHelper.addUser(username,name,isGroup);
+                                intent.putExtra("contacts","new");
+                            }
+                        }
+                    }
                     JSONArray jsonArray= (JSONArray) jsonObject.get("messages");
                     int arraySize=jsonArray.size();
-
+                    intent.putExtra("data","");
                     for(int i=0;i<arraySize;i++){
                         JSONObject jsonObject= (JSONObject) jsonArray.get(i);
                         String message=jsonObject.get("message").toString();
                         String senderName=jsonObject.get("senderName").toString();
                         Integer server_id=Integer.parseInt(jsonObject.get("id").toString());
                         databaseHelper.addMessage(server_id,senderName,username,message,jsonObject.get("timestamp").toString());
+                        intent.putExtra("data","saved");
                     }
                     JSONArray jsonArray1= (JSONArray) jsonObject.get("requested");
                     int arraySize1=jsonArray1.size();
@@ -130,6 +152,7 @@ public class GetAllMessagesService extends Service {
                         int id=Integer.parseInt(jsonObject.get("id").toString());
                         int requested=Integer.parseInt(jsonObject.get("requested").toString());
                         databaseHelper.updateMessageasRead(id,requested);
+                        intent.putExtra("data","saved");
                     }
                     JSONArray jsonArray2= (JSONArray) jsonObject.get("groupMessage");
                     int arraySize2=jsonArray2.size();
@@ -140,9 +163,13 @@ public class GetAllMessagesService extends Service {
                         String timestamp=jsonObject.get("timestamp").toString();
                         String senderName=jsonObject.get("senderName").toString();
                         String recieverName=jsonObject.get("recieverName").toString();
-                        databaseHelper.addMessage(id,senderName,recieverName,message,timestamp);
+                        if(databaseHelper.isGroup(recieverName)==1){
+                            databaseHelper.addMessage(id,senderName,recieverName,message,timestamp);
+                            intent.putExtra("data","saved");
+                        }
+
                     }
-                    intent.putExtra("data","saved");
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("GAMS",e.toString());
@@ -152,6 +179,7 @@ public class GetAllMessagesService extends Service {
             else{
 
                 Log.e("json Array","No data");
+                intent.putExtra("contacts","no");
                 intent.putExtra("data","nosaved");
             }
             sendBroadcast(intent);

@@ -66,13 +66,12 @@ public class GenericUserChat extends AppCompatActivity {
     EditText editText=null;
     static String targetUsername=null;
     static String name=null;
-    static int is_group=0;
     static String token=null;
     static DatabaseHelper databaseHelper=null;
     static String username=null;
     IntentFilter intentFilter=null;
     Intent readTheseMessages=null;
-
+    static int isUserGroup;
     public GenericUserDataBroadcastReceiver genericUserDataBroadcastReceiver;
     public static Context context;
     @Override
@@ -83,17 +82,16 @@ public class GenericUserChat extends AppCompatActivity {
         GenericUserChat.context=getApplicationContext();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-         targetUsername=getIntent().getStringExtra("USERNAME");
+        targetUsername=getIntent().getStringExtra("USERNAME");
         name=getIntent().getStringExtra("NAME");
-        is_group=getIntent().getIntExtra("is_group",-1);
-        Log.e("targetUsername",targetUsername);
         setTitle(name);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         messageIds=new ArrayList<>();
         listView= (ListView) findViewById(R.id.list_view);
-
-        userChatAdapter=new UserChatAdapter(this,messageIds);
+        databaseHelper= DatabaseHelper.getInstance(this);
+        isUserGroup=databaseHelper.isGroup(targetUsername);
+        userChatAdapter=new UserChatAdapter(this,messageIds,isUserGroup);
         listView.setAdapter(userChatAdapter);
         listView.setDivider(null);
         listView.setDividerHeight(0);
@@ -102,7 +100,7 @@ public class GenericUserChat extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
         token=sharedPreferences.getString("token","");
         username=sharedPreferences.getString("username","");
-        databaseHelper= DatabaseHelper.getInstance(this);
+
         genericUserDataBroadcastReceiver=new GenericUserDataBroadcastReceiver();
         intentFilter=new IntentFilter();
         intentFilter.addAction(GetAllMessagesService.BroadcastReceiver);
@@ -130,14 +128,12 @@ public class GenericUserChat extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         registerReceiver(genericUserDataBroadcastReceiver,intentFilter);
         readTheseMessages=new Intent(getApplicationContext(),ReadTheseMessages.class);
         readTheseMessages.putExtra("targetUsername",targetUsername);
         intent=new Intent(GenericUserChat.this,ReadTheseMessages.class);
         intent.putExtra("targetUsername",targetUsername);
         startService(intent);
-    Log.e("genericstarted","1");
     }
      Intent intent=null;
     @Override
@@ -145,7 +141,7 @@ public class GenericUserChat extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(genericUserDataBroadcastReceiver);
         stopService(intent);
-        Log.e("genericstopped","1");
+
     }
 
     @Override
@@ -177,8 +173,14 @@ public class GenericUserChat extends AppCompatActivity {
     }
 
     static  public void loadData() {
-        databaseHelper= DatabaseHelper.getInstance(context);
-        List<Integer> userMessagesList=databaseHelper.getIdOfMessages(username,targetUsername);
+        //databaseHelper= DatabaseHelper.getInstance(context);
+        List<Integer> userMessagesList=null;
+        if(isUserGroup==1){
+            userMessagesList=databaseHelper.getIdOfMessagesOfGroup(targetUsername);
+        }
+        else{
+            userMessagesList=databaseHelper.getIdOfMessages(username,targetUsername);
+        }
         int size=userMessagesList.size();
         messageIds.clear();;
         for(int i=0;i<size;i++){

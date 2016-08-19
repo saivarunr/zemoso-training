@@ -73,7 +73,7 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name=".ContactGetterService" />
+                <action android:name=".GetAllMessagesService" />
             </intent-filter>
         </receiver>
 
@@ -85,10 +85,10 @@
             android:name=".ReadTheseMessages"
             android:enabled="true"
             android:exported="true" />
-        <service
+<!--        <service
             android:name=".ContactGetterService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true" />-->
 
         <activity
             android:name=".CreateGroup"

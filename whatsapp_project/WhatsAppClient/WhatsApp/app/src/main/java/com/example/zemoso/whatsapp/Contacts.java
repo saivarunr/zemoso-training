@@ -78,7 +78,7 @@ public class Contacts extends ListFragment {
         }
         newContactsGetter=new NewContactsGetter();
         intentFilter=new IntentFilter();
-        intentFilter.addAction(ContactGetterService.ContactGetterSerivceString);
+        intentFilter.addAction(GetAllMessagesService.BroadcastReceiver);
     }
 
     @Override
@@ -242,8 +242,12 @@ public class Contacts extends ListFragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Contacts contacts=new Contacts();
-            contacts.loadData();
+            String newContactsFlag="";
+            newContactsFlag=intent.getStringExtra("contacts");
+            if(newContactsFlag.equals("new")) {
+                Contacts contacts = new Contacts();
+                contacts.loadData();
+            }
         }
     }
 }

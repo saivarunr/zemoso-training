@@ -129,8 +129,6 @@ public class MostRecentUser extends ListFragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 MostRecentUserAdapter mostRecentUserAdapter = (MostRecentUserAdapter) adapterView.getAdapter();
                 String username = mostRecentUserAdapter.getItem(i);
-
-
                     Intent intent = new Intent(getContext(), GenericUserChat.class);
                     intent.putExtra("USERNAME", username);
                     DatabaseHelper databaseHelper=new DatabaseHelper(getContext());
