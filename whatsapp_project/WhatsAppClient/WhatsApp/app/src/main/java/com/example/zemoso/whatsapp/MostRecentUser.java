@@ -51,9 +51,7 @@ public class MostRecentUser extends ListFragment {
 
     private OnFragmentInteractionListener mListener;
     IntentFilter intentFilter;
-   static ArrayList<String> usernames=null;
-    static ArrayList<String> lastMessages=null;
-    static   ArrayList<Date> times=null;
+   static  ArrayList<MostRecentUserWrapper> usersList=null;
     static  MostRecentUserAdapter mostRecentUserAdapter=null;
     static  String username=null;
     public MostRecentUser() {
@@ -94,27 +92,13 @@ public class MostRecentUser extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        usernames=new ArrayList<>();
-        lastMessages=new ArrayList<>();
-        times=new ArrayList<>();
-
+        usersList=new ArrayList<>();
         SharedPreferences sharedPreferences=getActivity().getSharedPreferences("zemoso_whatsapp",getContext().MODE_PRIVATE);
         username=sharedPreferences.getString("username","");
         DatabaseHelper databaseHelper= DatabaseHelper.getInstance(getContext());
-        List<MostRecentUserWrapper> usersList=databaseHelper.getMostRecent();
-        if(usersList.size()==0){
-            
-        }
-        usernames.clear();
-        lastMessages.clear();
-        times.clear();
-        for(int i=0;i<usersList.size();i++){
-            usernames.add(usersList.get(i).getUsername());
-            lastMessages.add(usersList.get(i).getMessage());
-            times.add(usersList.get(i).getDate());
-        }
-        mostRecentUserAdapter=new MostRecentUserAdapter(getActivity(),usernames,lastMessages,times);
+        usersList=databaseHelper.getMostRecent();
+
+        mostRecentUserAdapter=new MostRecentUserAdapter(getActivity(),usersList);
         setListAdapter(mostRecentUserAdapter);
         return inflater.inflate(R.layout.fragment_most_recent_user, container, false);
     }
@@ -134,8 +118,6 @@ public class MostRecentUser extends ListFragment {
                     DatabaseHelper databaseHelper=new DatabaseHelper(getContext());
                     String name=databaseHelper.getNameByUsername(username);
                     intent.putExtra("NAME",name);
-                    int is_group=databaseHelper.isGroup(username);
-                    intent.putExtra("is_group",is_group);
                     getContext().startActivity(intent);
 
 
@@ -182,16 +164,9 @@ public class MostRecentUser extends ListFragment {
         public void onReceive(Context context, Intent intent) {
             String data=intent.getStringExtra("data");
             if(data.equals("saved")){
-                usernames.clear();
-                times.clear();
-                lastMessages.clear();
+                usersList.clear();
                 DatabaseHelper databaseHelper=DatabaseHelper.getInstance(context);
-                List<MostRecentUserWrapper> usersList=databaseHelper.getMostRecent();
-                for(int i=0;i<usersList.size();i++){
-                    usernames.add(usersList.get(i).getUsername());
-                    lastMessages.add(usersList.get(i).getMessage());
-                    times.add(usersList.get(i).getDate());
-                }
+                usersList.addAll(databaseHelper.getMostRecent());
                 mostRecentUserAdapter.notifyDataSetChanged();
             }
         }

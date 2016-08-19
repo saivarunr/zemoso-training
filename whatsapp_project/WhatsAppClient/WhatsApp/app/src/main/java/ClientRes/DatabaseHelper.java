@@ -218,17 +218,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return name;
     }
-    public Integer isGroup(String username){
+    public Boolean isGroup(String username){
         SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
         Cursor cursor=sqLiteDatabase.rawQuery("select is_group from "+TABLE_NAME+" where username=?",new String[]{username});
         cursor.moveToFirst();
         int x=cursor.getInt(0);
         cursor.close();
-        return x;
+        return x==1;
 
     }
-    public List<MostRecentUserWrapper> getMostRecent(){
-        List<MostRecentUserWrapper> usersList=new ArrayList<>();
+    public ArrayList<MostRecentUserWrapper> getMostRecent(){
+        ArrayList<MostRecentUserWrapper> usersList=new ArrayList<>();
         SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
         String getMostRecentUsersQuery="select source,target,max(message_id) as temp_d from "+SECOND_TABLE+" group by source,target order by temp_d desc";
         Cursor cursor=sqLiteDatabase.rawQuery(getMostRecentUsersQuery,null);
@@ -238,16 +238,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String target=cursor.getString(1);
                 int id=cursor.getInt(2);
                 if(isValid(usersList,source,target)){
-                    if(databaseHelper.isGroup(source)==1){
-                        usersList.add(new MostRecentUserWrapper(source,id,target+": "+getMessageById(id),getTimestampById(id)));
+                    if(databaseHelper.isGroup(source)){
+                        usersList.add(new MostRecentUserWrapper(source,id,target+": "+getMessageById(id),getTimestampById(id),databaseHelper.getUnreadCount(source)));
                     }
-                    if(databaseHelper.isGroup(target)==1){
-                        usersList.add(new MostRecentUserWrapper(target,id,source+": "+getMessageById(id),getTimestampById(id)));
+                    if(databaseHelper.isGroup(target)){
+                        usersList.add(new MostRecentUserWrapper(target,id,source+": "+getMessageById(id),getTimestampById(id),databaseHelper.getUnreadCount(target)));
                     }else{
                         if(dbOwner.equals(source))
-                            usersList.add(new MostRecentUserWrapper(target,id,getMessageById(id),getTimestampById(id)));
+                            usersList.add(new MostRecentUserWrapper(target,id,getMessageById(id),getTimestampById(id),databaseHelper.getUnreadCount(target)));
                         else
-                            usersList.add(new MostRecentUserWrapper(source,id,getMessageById(id),getTimestampById(id)));
+                            usersList.add(new MostRecentUserWrapper(source,id,getMessageById(id),getTimestampById(id),databaseHelper.getUnreadCount(source)));
                     }
 
                 }
@@ -256,7 +256,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return usersList;
     }
+    public int getUnreadCount(String arg){
+        int count=0;
+        SQLiteDatabase sqLiteDatabase =databaseHelper.getReadableDatabase();
+        Cursor cursor=null;
+        String  getUnreadCountString=null;
+        try{
+            if(databaseHelper.isGroup(arg)){
+                getUnreadCountString="select count(*) from "+SECOND_TABLE+" where target=? and is_read=0";
+            }
+            else{
+                getUnreadCountString="select count(*) from "+SECOND_TABLE+" where source=? and target='"+dbOwner+"' and is_read=0";
+            }
+            cursor=sqLiteDatabase.rawQuery(getUnreadCountString,new String[]{arg});
+            cursor.moveToFirst();
+            count=cursor.getInt(0);
+        }
+        catch (Exception e){
 
+        }
+        finally {
+            cursor.close();
+        }
+        return count;
+    }
     public String getMessageById(int id){
         String message=null;
         SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
@@ -381,5 +404,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor.close();
         }
         return integers;
+    }
+
+    public void updateAllMessagesAsRead(String arg) {
+        String updateAllMessagesQueryString=null;
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
+        if(databaseHelper.isGroup(arg)){
+            updateAllMessagesQueryString="update "+SECOND_TABLE+" set is_read=1 where target=?";
+        }
+        else{
+            updateAllMessagesQueryString="update "+SECOND_TABLE+" set is_read=1 where source=?";
+        }
+        try{
+            sqLiteDatabase.execSQL(updateAllMessagesQueryString,new String[]{arg});
+
+        }
+        catch (Exception e){
+
+        }
+        finally {
+
+        }
     }
 }

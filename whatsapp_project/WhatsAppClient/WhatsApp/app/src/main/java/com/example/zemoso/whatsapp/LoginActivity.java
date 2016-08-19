@@ -53,6 +53,9 @@ public class LoginActivity extends AppCompatActivity {
         StrictMode.setThreadPolicy(threadPolicy);
         SharedPreferences sharedPreferences=getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
         String userToken=sharedPreferences.getString("token",null);
+        Intent fromRegisterIntent=getIntent();
+        String usernameD=fromRegisterIntent.getStringExtra("username");
+        String passwordD=fromRegisterIntent.getStringExtra("password");
         if(userToken!=null){
             this.startActivity(new Intent(LoginActivity.this,Home.class));
             finish();
@@ -61,6 +64,10 @@ public class LoginActivity extends AppCompatActivity {
         username=(EditText)findViewById(R.id.username);
         password=(EditText)findViewById(R.id.password);
         button=(Button)findViewById(R.id.button);
+        if(usernameD!=null){
+            username.setText(usernameD);
+            password.setText(passwordD);
+        }
         registerLabel=(TextView)findViewById(R.id.textView);
         /*
         Trigger login action from here

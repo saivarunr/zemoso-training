@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.text.ParseException;
@@ -34,8 +35,8 @@ public class UserChatAdapter extends BaseAdapter {
     DatabaseHelper databaseHelper=null;
     SharedPreferences sharedPreferences=null;
     String username=null;
-    Integer isUserGroup=0;
-    public UserChatAdapter(Context context,ArrayList<Integer> messageIds,Integer isUserGroup){
+    Boolean isUserGroup=false;
+    public UserChatAdapter(Context context,ArrayList<Integer> messageIds,Boolean isUserGroup){
         this.context=context;
         this.messageIds=messageIds;
         this.isUserGroup=isUserGroup;
@@ -70,8 +71,17 @@ public class UserChatAdapter extends BaseAdapter {
         LinearLayout linearLayout1= (LinearLayout) view.findViewById(R.id.message_container_wrapper);
         TextView textView= (TextView) view.findViewById(R.id.message_wrapper);
         TextView time=(TextView)view.findViewById(R.id.message_time_wrapper);
+        RelativeLayout relativeLayout= (RelativeLayout) view.findViewById(R.id.group_message_sender_name_wrapper);
+        TextView groupMessageSenderName= (TextView) view.findViewById(R.id.group_message_sender_name_container);
         ImageView imageView= (ImageView) view.findViewById(R.id.message_read_ticks);
-
+        String senderUsername=userMessages.getSender();
+        if(isUserGroup&!senderUsername.equals(username)){
+            relativeLayout.setVisibility(View.VISIBLE);
+            groupMessageSenderName.setText(senderUsername);
+        }
+        else{
+            relativeLayout.setVisibility(View.GONE);
+        }
         textView.setText(userMessages.getMessage());
         try {
             time.setText(DateUtils.getRelativeTimeSpanString(userMessages.getTimestamp().getTime(),System.currentTimeMillis(),DateUtils.MINUTE_IN_MILLIS));
@@ -82,12 +92,14 @@ public class UserChatAdapter extends BaseAdapter {
             imageView.setVisibility(View.VISIBLE);
             linearLayout.setGravity(Gravity.RIGHT);
             linearLayout1.setBackgroundResource(R.drawable.rounder_textview);
+            if(!isUserGroup)
+            {
             if(userMessages.getIsRead()==2)
-            imageView.setImageResource(R.drawable.message_seen_resource);
+                imageView.setImageResource(R.drawable.message_seen_resource);
             else if(userMessages.getIsRead()==1)
                 imageView.setImageResource(R.drawable.message_received_resource);
-            else
-                imageView.setImageResource(R.drawable.ic_done_black_24dp);
+
+            }
         }
         else{
             imageView.setVisibility(View.INVISIBLE);

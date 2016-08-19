@@ -13,11 +13,13 @@ public class MostRecentUserWrapper {
     private String message;
     private Date date;
     private String name;
-    public MostRecentUserWrapper(String username, int id, String message,Date date){
+    private int unreadCount=0;
+    public MostRecentUserWrapper(String username, int id, String message,Date date,int unreadCount){
         this.setUsername(username);
         this.setId(id);
         this.setMessage(message);
         this.setDate(date);
+        this.setUnreadCount(unreadCount);
     }
 
     public String getUsername() {
@@ -58,5 +60,13 @@ public class MostRecentUserWrapper {
     }
     public String getName(){
         return name;
+    }
+
+    public int getUnreadCount() {
+        return unreadCount;
+    }
+
+    public void setUnreadCount(int unreadCount) {
+        this.unreadCount = unreadCount;
     }
 }

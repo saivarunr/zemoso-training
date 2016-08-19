@@ -71,7 +71,7 @@ public class GenericUserChat extends AppCompatActivity {
     static String username=null;
     IntentFilter intentFilter=null;
     Intent readTheseMessages=null;
-    static int isUserGroup;
+    static boolean isUserGroup;
     public GenericUserDataBroadcastReceiver genericUserDataBroadcastReceiver;
     public static Context context;
     @Override
@@ -175,7 +175,7 @@ public class GenericUserChat extends AppCompatActivity {
     static  public void loadData() {
         //databaseHelper= DatabaseHelper.getInstance(context);
         List<Integer> userMessagesList=null;
-        if(isUserGroup==1){
+        if(isUserGroup){
             userMessagesList=databaseHelper.getIdOfMessagesOfGroup(targetUsername);
         }
         else{
@@ -187,6 +187,7 @@ public class GenericUserChat extends AppCompatActivity {
             messageIds.add(userMessagesList.get(i));
         }
         userChatAdapter.notifyDataSetChanged();
+
     }
 
 

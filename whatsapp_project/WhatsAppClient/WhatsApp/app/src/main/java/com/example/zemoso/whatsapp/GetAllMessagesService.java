@@ -163,7 +163,7 @@ public class GetAllMessagesService extends Service {
                         String timestamp=jsonObject.get("timestamp").toString();
                         String senderName=jsonObject.get("senderName").toString();
                         String recieverName=jsonObject.get("recieverName").toString();
-                        if(databaseHelper.isGroup(recieverName)==1){
+                        if(databaseHelper.isGroup(recieverName)){
                             databaseHelper.addMessage(id,senderName,recieverName,message,timestamp);
                             intent.putExtra("data","saved");
                         }

@@ -109,6 +109,8 @@ public class Register extends AppCompatActivity {
     class UserRegistration extends AsyncTask<Map<String,String>,Void,Integer>{
         View view;
         Context context;
+        String username=null;
+        String password=null;
         public UserRegistration(Context context,View view){
             this.context=context;
             this.view=view;
@@ -116,6 +118,7 @@ public class Register extends AppCompatActivity {
         @Override
         protected Integer doInBackground(Map<String, String>... maps) {
             int status=0;
+
             HttpURLConnection httpURLConnection=null;
             String serverAddress= ServerDetails.getServerAddress();
             try{
@@ -126,6 +129,8 @@ public class Register extends AppCompatActivity {
                 httpURLConnection.setDoInput(true);
                 httpURLConnection.setDoOutput(true);
                 httpURLConnection.connect();
+                username=maps[0].get("username");
+                password=maps[0].get("password");
                 JSONObject jsonObject=new JSONObject(maps[0]);
                 OutputStreamWriter outputStreamWriter=new OutputStreamWriter(httpURLConnection.getOutputStream());
                 outputStreamWriter.write(jsonObject.toJSONString());
@@ -147,6 +152,10 @@ public class Register extends AppCompatActivity {
             progressBar.setVisibility(View.INVISIBLE);
             if(status==200){
                 Toast.makeText(context,"Yay, you've successfully registered",Toast.LENGTH_SHORT).show();
+                Intent intent=new Intent(Register.this,LoginActivity.class);
+                intent.putExtra("username",username);
+                intent.putExtra("password",password);
+                context.startActivity(intent);
             }
             else if(status==400){
                 Toast.makeText(context,"Looks like username is already taken!",Toast.LENGTH_SHORT).show();

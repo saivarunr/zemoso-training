@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import ClientRes.DatabaseHelper;
 import ClientRes.ServerDetails;
 
 /**
@@ -22,6 +23,7 @@ import ClientRes.ServerDetails;
  */
 public class ReadTheseMessages extends Service {
     ThisClassThread thisClassThread=null;
+    DatabaseHelper databaseHelper=null;
     String target=null;
     @Nullable
     @Override
@@ -32,6 +34,7 @@ public class ReadTheseMessages extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        databaseHelper=DatabaseHelper.getInstance(getApplicationContext());
         thisClassThread=new ThisClassThread();
     }
 
@@ -54,6 +57,7 @@ boolean flag=true;
         public void run() {
             super.run();
             while (flag){try {
+                databaseHelper.updateAllMessagesAsRead(target);
                 new MessageReadStateUpadter().execute(target);
                 Thread.sleep(4000);
 
@@ -102,7 +106,6 @@ boolean flag=true;
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
-
 
         }
     }
