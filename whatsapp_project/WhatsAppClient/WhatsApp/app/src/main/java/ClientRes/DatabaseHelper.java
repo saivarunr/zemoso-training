@@ -405,7 +405,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return integers;
     }
+    public String getUserByMessageId(int id){
+        SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();
+        Cursor cursor=null;
+        String user=null;
+        try{
+        cursor=sqLiteDatabase.rawQuery("select source from "+SECOND_TABLE+" where message_id=?",new String[]{String.valueOf(id)});
+        cursor.moveToFirst();
+            user=cursor.getString(0);
+        }
+        catch (Exception e){
 
+        }
+        finally {
+            cursor.close();
+        }
+
+        return user;
+
+    }
     public void updateAllMessagesAsRead(String arg) {
         String updateAllMessagesQueryString=null;
         SQLiteDatabase sqLiteDatabase=databaseHelper.getReadableDatabase();

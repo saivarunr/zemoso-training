@@ -1,11 +1,8 @@
 package com.example.zemoso.whatsapp;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,8 +14,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import ClientRes.DatabaseHelper;
 import ClientRes.UserMessages;
@@ -67,6 +64,10 @@ public class UserChatAdapter extends BaseAdapter {
             view=layoutInflater.inflate(R.layout.list_view_resource,viewGroup,false);
         }
         UserMessages userMessages=databaseHelper.getWholeMessageById(messageIds.get(i));
+        UserMessages userMessages1=null;
+        if(i>0){
+            userMessages1=databaseHelper.getWholeMessageById(messageIds.get(i-1));
+        }
         LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.message_container);
         LinearLayout linearLayout1= (LinearLayout) view.findViewById(R.id.message_container_wrapper);
         TextView textView= (TextView) view.findViewById(R.id.message_wrapper);
@@ -84,14 +85,25 @@ public class UserChatAdapter extends BaseAdapter {
         }
         textView.setText(userMessages.getMessage());
         try {
-            time.setText(DateUtils.getRelativeTimeSpanString(userMessages.getTimestamp().getTime(),System.currentTimeMillis(),DateUtils.MINUTE_IN_MILLIS));
+            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("hh:mm a");
+            String x=simpleDateFormat.format(userMessages.getTimestamp());
+            time.setText(x);
+            //time.setText(DateUtils.getRelativeTimeSpanString(userMessages.getTimestamp().getTime(),System.currentTimeMillis(),DateUtils.MINUTE_IN_MILLIS));
         } catch (ParseException e) {
             e.printStackTrace();
         }
         if(userMessages.getSender().equals(username)){
+            if(i==0){
+                linearLayout1.setBackgroundResource(R.drawable.send1);
+            }
+            else if(i>0&&!userMessages.getSender().equals(userMessages1.getSender())){
+                linearLayout1.setBackgroundResource(R.drawable.send1);
+            }
+            else{
+                linearLayout1.setBackgroundResource(R.drawable.rounder_textview);
+            }
             imageView.setVisibility(View.VISIBLE);
             linearLayout.setGravity(Gravity.RIGHT);
-            linearLayout1.setBackgroundResource(R.drawable.rounder_textview);
             if(!isUserGroup)
             {
             if(userMessages.getIsRead()==2)
@@ -102,9 +114,18 @@ public class UserChatAdapter extends BaseAdapter {
             }
         }
         else{
+            if(i==0|!userMessages.getSender().equals(userMessages1.getSender())){
+                linearLayout1.setBackgroundResource(R.drawable.rec11);
+            }
+            else if(i>0&&!userMessages.getSender().equals(userMessages1.getSender())){
+                linearLayout1.setBackgroundResource(R.drawable.rec11);
+            }
+            else{
+                linearLayout1.setBackgroundResource(R.drawable.rounder_textview);
+            }
             imageView.setVisibility(View.INVISIBLE);
             linearLayout.setGravity(Gravity.LEFT);
-            linearLayout1.setBackgroundResource(R.drawable.round_text_view_sender);
+
         }
         return view;
     }
