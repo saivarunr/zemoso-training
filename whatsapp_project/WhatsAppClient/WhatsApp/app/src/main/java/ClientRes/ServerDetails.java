@@ -9,6 +9,6 @@ public class ServerDetails {
 
     private final static String homeAddr="http://192.168.1.4:9000";
     public static String getServerAddress(){
-        return homeAddr;
+        return serverAddress;
     }
 }
