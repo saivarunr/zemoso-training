@@ -5,30 +5,46 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -64,6 +80,7 @@ public class GenericUserChat extends AppCompatActivity {
     ListView listView=null;
     Button button=null;
     EditText editText=null;
+    Button photoButton=null;
     static String targetUsername=null;
     static String name=null;
     static String token=null;
@@ -96,6 +113,7 @@ public class GenericUserChat extends AppCompatActivity {
         listView.setDivider(null);
         listView.setDividerHeight(0);
         button= (Button) findViewById(R.id.button3);
+        photoButton= (Button) findViewById(R.id.generic_user_chat_photo_selector_button);
         editText=(EditText)findViewById(R.id.editText);
         SharedPreferences sharedPreferences = getSharedPreferences("zemoso_whatsapp",MODE_PRIVATE);
         token=sharedPreferences.getString("token","");
@@ -111,6 +129,21 @@ public class GenericUserChat extends AppCompatActivity {
 
         loadData();
         listView.setSelection(listView.getCount()-1);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                LinearLayout linearLayout= (LinearLayout) view;
+                ImageView imageView= (ImageView) linearLayout.findViewById(R.id.generic_user_chat_photo);
+                if(imageView.getVisibility()==View.VISIBLE){
+                    Intent intent=new Intent(GenericUserChat.this,ImageViewActivity.class);
+                    UserChatAdapter userChatAdapter= (UserChatAdapter) adapterView.getAdapter();
+                    Integer integer=userChatAdapter.getItem(i);
+                    intent.putExtra("imageId",integer);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    getApplicationContext().startActivity(intent);
+                }
+            }
+        });
         /*
             Now for every input by user update listview
          */
@@ -118,11 +151,36 @@ public class GenericUserChat extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String data=getEditTextData();
-                if(!data.isEmpty()){
+                NetworkInfo networkInfo=ServerDetails.getConnectedState(getApplicationContext());
+                if(networkInfo==null){
+                    Toast.makeText(getApplicationContext(),"You're in offline mode, cannot send message",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(!data.isEmpty()|!filePath.equals("")){
                     publishData(data);
                 }
             }
         });
+        photoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent();
+                intent.setType("image/jpeg");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent,"Image to upload"),1);
+            }
+        });
+
+    }
+    public  String filePath="";
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==1&&resultCode==-1&&data!=null){
+            Uri uri=data.getData();
+            filePath=uri.getPath();
+            Toast.makeText(getApplicationContext(),"Image selected for upload",Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -134,6 +192,7 @@ public class GenericUserChat extends AppCompatActivity {
         intent=new Intent(GenericUserChat.this,ReadTheseMessages.class);
         intent.putExtra("targetUsername",targetUsername);
         startService(intent);
+
     }
      Intent intent=null;
     @Override
@@ -154,7 +213,9 @@ public class GenericUserChat extends AppCompatActivity {
 
 
         try {
-            Integer b=new DataSender().execute(token,targetUsername,data).get();
+
+            Integer b=new DataSender(filePath).execute(token,targetUsername,data).get();
+            filePath="";
             if(b>-1){
                 updateView(data,b);
             }
@@ -202,11 +263,38 @@ public class GenericUserChat extends AppCompatActivity {
 class DataSender extends AsyncTask<String,Void,Integer> {
     HttpURLConnection httpURLConnection=null;
     int status=0;
+    String encodedString="";
+    byte b[]=null;
+    String filePath=null;
+    DataSender(String filePath){
+        this.filePath=filePath;
+        if(!filePath.equals("")){
+            File file=new File(filePath);
+            byte[] b1=new byte[(int)file.length()];
+            FileInputStream fileInputStream= null;
+            try {
+                fileInputStream = new FileInputStream(file);
+                fileInputStream.read(b1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            b=Base64.encode(b1,0);
+            encodedString=new String(b);
+        }
+    }
+
+
+
     @Override
     protected Integer doInBackground(String... strings) {
         Integer completionFlag=-1;
         String serverAddress= ServerDetails.getServerAddress();
         try {
+            org.json.simple.JSONObject jsonObject=new org.json.simple.JSONObject();
+
+            jsonObject.put("target",strings[1]);
+            jsonObject.put("message",strings[2]);
+            jsonObject.put("file",encodedString);
             URL url=new URL(serverAddress+"/postMessage");
             httpURLConnection=(HttpURLConnection)url.openConnection();
             httpURLConnection.setRequestMethod("POST");
@@ -214,20 +302,28 @@ class DataSender extends AsyncTask<String,Void,Integer> {
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setRequestProperty("Authorization",strings[0]);
             httpURLConnection.setRequestProperty("Content-Type","application/json");
+            httpURLConnection.setRequestProperty("Connection","Keep-Alive");
             httpURLConnection.connect();
-            org.json.simple.JSONObject jsonObject=new org.json.simple.JSONObject();
-            jsonObject.put("target",strings[1]);
-            jsonObject.put("message",strings[2]);
             OutputStreamWriter outputStreamWriter=new OutputStreamWriter(httpURLConnection.getOutputStream());
             outputStreamWriter.write(jsonObject.toJSONString());
             outputStreamWriter.flush();
+            outputStreamWriter.close();
             InputStreamReader inputStreamReader=new InputStreamReader(httpURLConnection.getInputStream());
             JSONParser jsonParser=new JSONParser();
             JSONObject jsonObject1= (JSONObject) jsonParser.parse(inputStreamReader);
+            inputStreamReader.close();
             status=httpURLConnection.getResponseCode();
-            Log.e("json",jsonObject.toJSONString());
+            Log.e("status",""+status);
             if(status==200){
                 completionFlag=Integer.parseInt(jsonObject1.get("message").toString());
+                if(!encodedString.equals("")){
+                    File file=new File(android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()+"/ZeMoSoWP");
+                    FileOutputStream fileOutputStream=new FileOutputStream(file.getAbsolutePath()+"/"+completionFlag+".jpg");
+                    fileOutputStream.write(Base64.decode(b,0));
+                    fileOutputStream.flush();
+                    fileOutputStream.close();
+                }
+
             }
         }
         catch (Exception e){

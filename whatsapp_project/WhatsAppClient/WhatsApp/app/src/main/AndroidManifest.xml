@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -85,10 +86,7 @@
             android:name=".ReadTheseMessages"
             android:enabled="true"
             android:exported="true" />
-<!--        <service
-            android:name=".ContactGetterService"
-            android:enabled="true"
-            android:exported="true" />-->
+
 
         <activity
             android:name=".CreateGroup"
@@ -98,6 +96,8 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zemoso.whatsapp.Home" />
+        </activity>
+        <activity android:name=".ImageViewActivity">
         </activity>
     </application>
 

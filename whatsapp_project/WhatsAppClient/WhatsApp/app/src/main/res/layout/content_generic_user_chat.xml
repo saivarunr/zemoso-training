@@ -40,6 +40,12 @@
                 android:layout_gravity="left"
                 />
             <Button
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_camera_enhance_black_24dp"
+                android:id="@+id/generic_user_chat_photo_selector_button"
+                />
+            <Button
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/navigationarrow"

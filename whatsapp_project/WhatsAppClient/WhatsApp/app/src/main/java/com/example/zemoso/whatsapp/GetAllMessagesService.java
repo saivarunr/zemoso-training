@@ -4,14 +4,18 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 import android.util.Log;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -27,6 +31,8 @@ import ClientRes.Users;
  */
 public class GetAllMessagesService extends Service {
     DatabaseHelper databaseHelper;
+    File file=new File(android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()+"/ZeMoSoWP");
+    String filePath=file.getAbsolutePath();
     ThisClassThread thisClassThread=null;
     public static final String BroadcastReceiver="MessageGetterHost";
     String username=null;
@@ -61,7 +67,8 @@ public class GetAllMessagesService extends Service {
             super.run();
             while (true){
                 try {
-                    new MessageGetterHttpService().execute();
+                    //if(ServerDetails.getConnectedState(getApplicationContext())!=null)
+                        new MessageGetterHttpService().execute();
                     Thread.sleep(4000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -168,6 +175,18 @@ public class GetAllMessagesService extends Service {
                             intent.putExtra("data","saved");
                         }
 
+                    }
+                    JSONArray array=(JSONArray) jsonObject.get("files");
+                    for(int i=0;i<array.size();i++){
+                        JSONObject jsonObject2=(JSONObject) array.get(i);
+                        JSONObject mMessages=(JSONObject) jsonObject2.get("messages");
+                        String id=mMessages.get("id").toString();
+                        String encodedString=jsonObject2.get("fileEncoded").toString();
+                        byte b[]=Base64.decode(encodedString.getBytes(),0);
+                        FileOutputStream fileOutputStream=new FileOutputStream(filePath+"/"+id+".jpg");
+                        fileOutputStream.write(b);
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
                     }
 
                 } catch (Exception e) {

@@ -33,6 +33,13 @@ create table messages (
   constraint pk_messages primary key (id)
 );
 
+create table user_files (
+  id                            bigint auto_increment not null,
+  messages_id                   bigint,
+  file_encoded                  MEDIUMTEXT,
+  constraint pk_user_files primary key (id)
+);
+
 create table users (
   username                      varchar(255) not null,
   password                      varchar(255),
@@ -61,6 +68,9 @@ create index ix_messages_sender_username on messages (sender_username);
 alter table messages add constraint fk_messages_reciever_username foreign key (reciever_username) references users (username) on delete restrict on update restrict;
 create index ix_messages_reciever_username on messages (reciever_username);
 
+alter table user_files add constraint fk_user_files_messages_id foreign key (messages_id) references messages (id) on delete restrict on update restrict;
+create index ix_user_files_messages_id on user_files (messages_id);
+
 
 # --- !Downs
 
@@ -82,6 +92,9 @@ drop index ix_messages_sender_username on messages;
 alter table messages drop foreign key fk_messages_reciever_username;
 drop index ix_messages_reciever_username on messages;
 
+alter table user_files drop foreign key fk_user_files_messages_id;
+drop index ix_user_files_messages_id on user_files;
+
 drop table if exists group_message_valid;
 
 drop table if exists group_user;
@@ -89,6 +102,8 @@ drop table if exists group_user;
 drop table if exists groups;
 
 drop table if exists messages;
+
+drop table if exists user_files;
 
 drop table if exists users;
 

@@ -2,7 +2,11 @@ package com.example.zemoso.whatsapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -48,8 +53,8 @@ public class UserChatAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int i) {
-        return i;
+    public Integer getItem(int i) {
+        return messageIds.get(i);
     }
 
     @Override
@@ -75,7 +80,17 @@ public class UserChatAdapter extends BaseAdapter {
         RelativeLayout relativeLayout= (RelativeLayout) view.findViewById(R.id.group_message_sender_name_wrapper);
         TextView groupMessageSenderName= (TextView) view.findViewById(R.id.group_message_sender_name_container);
         ImageView imageView= (ImageView) view.findViewById(R.id.message_read_ticks);
+        ImageView imageView1= (ImageView) view.findViewById(R.id.generic_user_chat_photo);
         String senderUsername=userMessages.getSender();
+        File file=new File(android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()+"/ZeMoSoWP/"+(userMessages.getMessageId())+".jpg");
+        if(file.exists()){
+            Bitmap bitmap= BitmapFactory.decodeFile(file.getAbsolutePath());
+            imageView1.setVisibility(View.VISIBLE);
+            imageView1.setImageBitmap(bitmap);
+        }
+        else{
+            imageView1.setVisibility(View.GONE);
+        }
         if(isUserGroup&!senderUsername.equals(username)){
             relativeLayout.setVisibility(View.VISIBLE);
             groupMessageSenderName.setText(senderUsername);
@@ -88,7 +103,6 @@ public class UserChatAdapter extends BaseAdapter {
             SimpleDateFormat simpleDateFormat=new SimpleDateFormat("hh:mm a");
             String x=simpleDateFormat.format(userMessages.getTimestamp());
             time.setText(x);
-            //time.setText(DateUtils.getRelativeTimeSpanString(userMessages.getTimestamp().getTime(),System.currentTimeMillis(),DateUtils.MINUTE_IN_MILLIS));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -100,7 +114,7 @@ public class UserChatAdapter extends BaseAdapter {
                 linearLayout1.setBackgroundResource(R.drawable.send1);
             }
             else{
-                linearLayout1.setBackgroundResource(R.drawable.rounder_textview);
+                linearLayout1.setBackgroundResource(R.drawable.round_text_view_sender);
             }
             imageView.setVisibility(View.VISIBLE);
             linearLayout.setGravity(Gravity.RIGHT);
@@ -114,7 +128,7 @@ public class UserChatAdapter extends BaseAdapter {
             }
         }
         else{
-            if(i==0|!userMessages.getSender().equals(userMessages1.getSender())){
+            if(i==0){
                 linearLayout1.setBackgroundResource(R.drawable.rec11);
             }
             else if(i>0&&!userMessages.getSender().equals(userMessages1.getSender())){

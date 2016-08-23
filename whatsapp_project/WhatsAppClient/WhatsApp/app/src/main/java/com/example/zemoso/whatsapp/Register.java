@@ -2,6 +2,7 @@ package com.example.zemoso.whatsapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -65,6 +66,10 @@ public class Register extends AppCompatActivity {
                         map.put("username",username);
                         map.put("password",password);
                         map.put("name",users_name_1);
+                        NetworkInfo networkInfo=ServerDetails.getConnectedState(getApplicationContext());
+                        if(networkInfo==null){
+                            Toast.makeText(getApplicationContext(),"Cannot register, device not connected to internet",Toast.LENGTH_SHORT).show();
+                        }
                         new UserRegistration(view.getContext(),view).execute(map);
                 }
 

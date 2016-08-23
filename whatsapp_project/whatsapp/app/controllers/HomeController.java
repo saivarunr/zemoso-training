@@ -18,6 +18,7 @@ import models.GroupMessageValid;
 import models.Group_User;
 import models.Groups;
 import models.Messages;
+import models.UserFiles;
 import models.Users;
 import play.libs.Json;
 import play.mvc.*;
@@ -170,13 +171,15 @@ public class HomeController extends Controller {
     	String x=jsonNode.path("image").asText();
     	return ok(x);
     }
-    public Result postMessage(){
+    
+    public  Result postMessage(){
     	String token=request().getHeader("Authorization");
     	ObjectNode node=Json.newObject();
     	JsonNode jsonNode=request().body().asJson();
     	String t=jsonNode.path("target").asText("");
     	String message=jsonNode.path("message").asText("");
-    	if(t.equals("")||message.equals("")){
+    	String fileEncoded=jsonNode.path("file").asText("");
+    	if(t.equals("")){
     		node.put("message", "Invalid message");
     		return badRequest(node);
     	}
@@ -185,6 +188,10 @@ public class HomeController extends Controller {
     		Users target=Ebean.find(Users.class).where().eq("username", t).findUnique();
     		Messages messages=new Messages(source,target,message);
     		Ebean.save(messages);
+    		if(!fileEncoded.equals("")){
+    			UserFiles userFiles=new UserFiles(messages, fileEncoded);
+        		Ebean.save(userFiles);	
+    		}
     		node.put("message",messages.getId());
     		return ok(node);
     	}
@@ -314,8 +321,10 @@ public class HomeController extends Controller {
 	    			.endJunction()
 	    		.orderBy("timestamp")
     		.findList();
+			List<UserFiles> files=new ArrayList<UserFiles>();
     		for(Messages messages:list){
     			Messages messages2=Ebean.find(Messages.class).where().eq("id",messages.getId()).findUnique();
+    			files.add(Ebean.find(UserFiles.class).where().eq("messages", messages).findUnique());
     			messages2.setRequested(1);
     			Ebean.update(messages2);
     		}
@@ -359,6 +368,7 @@ public class HomeController extends Controller {
     			Ebean.save(messageValid);
     		}
     		node.put("groupMessage", Json.toJson(list3));
+    		node.put("files", Json.toJson(files));
     		return ok(node);
     	}
     	catch(Exception e){
