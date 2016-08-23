@@ -179,7 +179,16 @@ public class GenericUserChat extends AppCompatActivity {
         if(requestCode==1&&resultCode==-1&&data!=null){
             Uri uri=data.getData();
             filePath=uri.getPath();
-            Toast.makeText(getApplicationContext(),"Image selected for upload",Toast.LENGTH_SHORT).show();
+
+            File f=new File(filePath);
+            if((int)f.length()>2097152){
+                Toast.makeText(getApplicationContext(),"Image too large to upload",Toast.LENGTH_LONG).show();
+                filePath="";
+            }
+            else{
+                Toast.makeText(getApplicationContext(),"Image selected for upload",Toast.LENGTH_SHORT).show();
+            }
+
         }
     }
 
@@ -326,7 +335,11 @@ class DataSender extends AsyncTask<String,Void,Integer> {
 
             }
         }
+        catch (FileNotFoundException e){
+            Toast.makeText(GenericUserChat.context,"Image too large to upload!",Toast.LENGTH_LONG).show();
+        }
         catch (Exception e){
+
             Log.e("UserChat.java",e.toString());
         }
         finally {
