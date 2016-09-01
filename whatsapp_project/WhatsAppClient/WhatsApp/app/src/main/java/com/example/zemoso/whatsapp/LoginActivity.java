@@ -153,7 +153,7 @@ public class LoginActivity extends AppCompatActivity {
             this.context=context;
             this.view=view;
         }
-
+//TODO: not registered users snackbar!
 
         @Override
         protected Integer doInBackground(Map<String, String>... maps) {

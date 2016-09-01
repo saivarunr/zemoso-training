@@ -5,59 +5,62 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import ClientRes.DatabaseHelper;
 import ClientRes.ServerDetails;
-import ClientRes.UserMessages;
 
 public class GenericUserChat extends AppCompatActivity {
+    public static boolean isPhotoSelected() {
+        return photoSelected;
+
+    }
+
+    public static void setPhotoSelected(boolean photoSelected) {
+        GenericUserChat.photoSelected = photoSelected;
+        if(!photoSelected)
+            setFilePath("");
+    }
+
+    public static String getFilePath() {
+        return filePath;
+    }
+
+    public  static void setFilePath(String filePath) {
+        GenericUserChat.filePath = filePath;
+    }
+
     public static class GenericUserDataBroadcastReceiver extends BroadcastReceiver {
 
         GenericUserChat genericUserChat=new GenericUserChat();
@@ -88,9 +91,11 @@ public class GenericUserChat extends AppCompatActivity {
     static String username=null;
     IntentFilter intentFilter=null;
     Intent readTheseMessages=null;
+    private static boolean photoSelected=false;
     static boolean isUserGroup;
     public GenericUserDataBroadcastReceiver genericUserDataBroadcastReceiver;
     public static Context context;
+    private static String filePath="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -147,6 +152,7 @@ public class GenericUserChat extends AppCompatActivity {
         /*
             Now for every input by user update listview
          */
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -156,7 +162,7 @@ public class GenericUserChat extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"You're in offline mode, cannot send message",Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if(!data.isEmpty()|!filePath.equals("")){
+                if(!data.isEmpty()|!getFilePath().equals("")){
                     publishData(data);
                 }
             }
@@ -164,29 +170,37 @@ public class GenericUserChat extends AppCompatActivity {
         photoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent();
-                intent.setType("image/jpeg");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent,"Image to upload"),1);
+                if(isPhotoSelected()){
+                    setPhotoSelected(false);
+                    Toast.makeText(getApplicationContext(),"Photo unselected",Toast.LENGTH_LONG).show();
+                }
+                else {
+                    Intent intent = new Intent();
+                    intent.setType("image/jpeg");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent, "Image to upload"), 1);
+                }
             }
         });
 
     }
-    public  String filePath="";
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==1&&resultCode==-1&&data!=null){
             Uri uri=data.getData();
-            filePath=uri.getPath();
+            setFilePath(uri.getPath());
 
-            File f=new File(filePath);
+            File f=new File(getFilePath());
             if((int)f.length()>2097152){
                 Toast.makeText(getApplicationContext(),"Image too large to upload",Toast.LENGTH_LONG).show();
-                filePath="";
+                setFilePath("");
+                setPhotoSelected(false);
             }
             else{
                 Toast.makeText(getApplicationContext(),"Image selected for upload",Toast.LENGTH_SHORT).show();
+                setPhotoSelected(true);
             }
 
         }
@@ -223,10 +237,11 @@ public class GenericUserChat extends AppCompatActivity {
 
         try {
 
-            Integer b=new DataSender(filePath).execute(token,targetUsername,data).get();
-            filePath="";
+            Integer b=new DataSender(getFilePath()).execute(token,targetUsername,data).get();
+            setFilePath("");
             if(b>-1){
                 updateView(data,b);
+                setPhotoSelected(false);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -332,7 +347,6 @@ class DataSender extends AsyncTask<String,Void,Integer> {
                     fileOutputStream.flush();
                     fileOutputStream.close();
                 }
-
             }
         }
         catch (FileNotFoundException e){
@@ -351,6 +365,7 @@ class DataSender extends AsyncTask<String,Void,Integer> {
     @Override
     protected void onPostExecute(Integer aBoolean) {
         super.onPostExecute(aBoolean);
+
 
     }
 
